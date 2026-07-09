@@ -1,104 +1,160 @@
+export type Category = "Parfait" | "Yoghurt";
+
 export type Product = {
   id: string;
   name: string;
+  variety?: string; // e.g. "Premium Treat"
   tagline: string;
-  category: "Yoghurt" | "Parfait" | "Juice" | "Salad";
-  price: number; // single order, in Naira
-  bulkPrice: number; // per unit for bulk (min 12)
+  category: Category;
+  price: number; // regular single price, Naira
+  launchPrice: number; // launch-offer single price
+  bulkPrice: number; // per unit for 12+ orders
   size: string;
-  // colour stops used to procedurally render the product visual
-  colors: [string, string, string];
+  image: string; // /products/<id>.png — swap in real photography anytime
+  colors: [string, string, string]; // fallback SVG colour stops
   badge?: string;
 };
 
 export const NAIRA = "₦";
 
+/** Grand opening — Sunday 14 July 2026, 9am WAT. */
+export const LAUNCH_DATE = new Date("2026-07-14T09:00:00+01:00");
+export const LAUNCH_OFFER = true;
+
+export const BRAND = {
+  whatsapp: "2347036899441",
+  whatsappDisplay: "0703 689 9441",
+  instagram: "https://instagram.com/ruabyfresh",
+  tiktok: "https://tiktok.com/@ruabyfresh",
+  facebook: "https://facebook.com/ruabyfresh",
+  handle: "@ruabyfresh",
+  city: "Asaba, Delta State",
+};
+
 export const products: Product[] = [
+  // ---------------- PARFAITS (15% launch offer) ----------------
+  {
+    id: "parfait-500",
+    name: "500ml Parfait",
+    variety: "Premium Exotic",
+    tagline: "The ultimate satisfying bowl — a burst of exotic flavour in every spoonful.",
+    category: "Parfait",
+    price: 5000,
+    launchPrice: 4250,
+    bulkPrice: 3900,
+    size: "500ml",
+    image: "/products/parfait-500.png",
+    colors: ["#ffffff", "#ffe08a", "#8bc63f"],
+    badge: "Premium Exotic",
+  },
+  {
+    id: "parfait-330",
+    name: "330ml Parfait",
+    variety: "Premium Treat",
+    tagline: "Just the right size — the perfect balance of taste and nutrition.",
+    category: "Parfait",
+    price: 3500,
+    launchPrice: 2975,
+    bulkPrice: 2700,
+    size: "330ml",
+    image: "/products/parfait-330.png",
+    colors: ["#ffffff", "#f0a8c0", "#6d4aa0"],
+    badge: "Signature",
+  },
+  {
+    id: "parfait-250",
+    name: "250ml Parfait",
+    variety: "Tropical Delight",
+    tagline: "Perfect for a light & healthy treat — tropical freshness that brightens your day.",
+    category: "Parfait",
+    price: 2500,
+    launchPrice: 2125,
+    bulkPrice: 1900,
+    size: "250ml",
+    image: "/products/parfait-250.png",
+    colors: ["#ffffff", "#f7b8d4", "#e64b4b"],
+  },
+
+  // ---------------- YOGHURT DRINKS (500ml · ₦3000 → ₦2500) ----------------
   {
     id: "strawberry-yoghurt",
-    name: "Strawberry Yoghurt",
-    tagline: "Sun-ripened berries, whipped smooth",
+    name: "Strawberry Yoghurt Drink",
+    tagline: "Sun-ripened strawberries, rich & creamy.",
     category: "Yoghurt",
-    price: 2500,
-    bulkPrice: 2100,
+    price: 3000,
+    launchPrice: 2500,
+    bulkPrice: 2200,
     size: "500ml",
+    image: "/products/strawberry-yoghurt.png",
     colors: ["#ffd7e6", "#f06aa0", "#e64b4b"],
     badge: "Bestseller",
   },
   {
     id: "banana-yoghurt",
-    name: "Banana Yoghurt",
-    tagline: "Silky, mellow & naturally sweet",
+    name: "Banana Yoghurt Drink",
+    tagline: "Silky, mellow & naturally sweet.",
     category: "Yoghurt",
-    price: 2500,
-    bulkPrice: 2100,
+    price: 3000,
+    launchPrice: 2500,
+    bulkPrice: 2200,
     size: "500ml",
+    image: "/products/banana-yoghurt.png",
     colors: ["#fff4c2", "#ffe08a", "#e9c94a"],
   },
   {
     id: "vanilla-yoghurt",
-    name: "Vanilla Yoghurt",
-    tagline: "Madagascar vanilla, clean & classic",
+    name: "Vanilla Yoghurt Drink",
+    tagline: "Smooth, creamy Madagascar vanilla.",
     category: "Yoghurt",
-    price: 2400,
-    bulkPrice: 2000,
+    price: 3000,
+    launchPrice: 2500,
+    bulkPrice: 2200,
     size: "500ml",
+    image: "/products/vanilla-yoghurt.png",
     colors: ["#fffaf0", "#f6ecd6", "#e6d4a8"],
   },
   {
-    id: "parfait-250",
-    name: "250ml Parfait",
-    tagline: "Granola, fruit & yoghurt layers",
-    category: "Parfait",
-    price: 2800,
-    bulkPrice: 2400,
-    size: "250ml",
-    colors: ["#f7b8d4", "#c7e59a", "#8bc63f"],
-  },
-  {
-    id: "parfait-330",
-    name: "330ml Parfait",
-    tagline: "The signature — layered to perfection",
-    category: "Parfait",
-    price: 3500,
-    bulkPrice: 3000,
-    size: "330ml",
-    colors: ["#f7b8d4", "#ffe08a", "#8bc63f"],
-    badge: "Signature",
-  },
-  {
-    id: "parfait-500",
-    name: "500ml Parfait",
-    tagline: "The big one — share, or don't",
-    category: "Parfait",
-    price: 4800,
-    bulkPrice: 4200,
+    id: "mango-yoghurt",
+    name: "Mango Yoghurt Drink",
+    tagline: "Golden, juicy mango sunshine.",
+    category: "Yoghurt",
+    price: 3000,
+    launchPrice: 2500,
+    bulkPrice: 2200,
     size: "500ml",
-    colors: ["#e64b4b", "#f7b8d4", "#8bc63f"],
+    image: "/products/mango-yoghurt.png",
+    colors: ["#ffe9b0", "#ffc84a", "#ff9a2e"],
   },
   {
-    id: "berry-juice",
-    name: "Mixed Berry Juice",
-    tagline: "Cold-pressed strawberry & blueberry",
-    category: "Juice",
-    price: 2000,
-    bulkPrice: 1700,
-    size: "400ml",
-    colors: ["#f7b8d4", "#c65a9a", "#6d4aa0"],
+    id: "blueberry-yoghurt",
+    name: "Blueberry Yoghurt Drink",
+    tagline: "Deep, antioxidant-rich blueberry.",
+    category: "Yoghurt",
+    price: 3000,
+    launchPrice: 2500,
+    bulkPrice: 2200,
+    size: "500ml",
+    image: "/products/blueberry-yoghurt.png",
+    colors: ["#dcd0f0", "#9a7ad0", "#6d4aa0"],
   },
   {
-    id: "green-salad",
-    name: "Garden Fresh Salad",
-    tagline: "Crisp greens, kiwi & citrus",
-    category: "Salad",
-    price: 3200,
-    bulkPrice: 2800,
-    size: "Regular",
+    id: "kiwi-yoghurt",
+    name: "Kiwi Yoghurt Drink",
+    tagline: "Zesty, refreshing green kiwi.",
+    category: "Yoghurt",
+    price: 3000,
+    launchPrice: 2500,
+    bulkPrice: 2200,
+    size: "500ml",
+    image: "/products/kiwi-yoghurt.png",
     colors: ["#e8f6d2", "#a8d85a", "#4e8a2b"],
   },
 ];
 
-export const categories = ["All", "Yoghurt", "Parfait", "Juice", "Salad"] as const;
+export const categories = ["All", "Parfait", "Yoghurt"] as const;
+
+export const getProduct = (id: string) =>
+  products.find((p) => p.id === id) ?? products[0];
 
 export function formatNaira(n: number) {
   return `${NAIRA}${n.toLocaleString("en-NG")}`;

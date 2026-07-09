@@ -4,13 +4,15 @@ const words = [
   "Strawberry",
   "Parfait",
   "Banana",
-  "Cold-Pressed",
+  "Rich & Creamy",
   "Vanilla",
   "No Preservatives",
   "Granola",
   "Fresh Daily",
   "Blueberry",
   "Handcrafted",
+  "Mango",
+  "Kiwi",
 ];
 
 export default function Marquee() {

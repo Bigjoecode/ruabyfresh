@@ -17,15 +17,15 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "Ruaby Fresh — Fresh Vibes Only",
+  title: "Ruaby Fresh — Fresh Vibes Only | Launching 14 July 2026",
   description:
-    "Premium yoghurt, parfaits, juices & salads, made fresh daily in Asaba. No artificial preservatives. Single & bulk orders with fast delivery. Healthy never tasted this good.",
+    "Handcrafted parfaits & creamy 500ml yoghurt drinks, made fresh daily in Asaba. No artificial preservatives. Launching 14 July 2026 — pre-order now and enjoy 15% off all parfaits. Healthy never tasted this good.",
   keywords: [
     "Ruaby Fresh",
     "yoghurt Asaba",
     "parfait",
     "premium yoghurt Nigeria",
-    "fresh juices",
+    "yoghurt drink Asaba",
     "healthy dessert",
     "bulk yoghurt orders",
   ],

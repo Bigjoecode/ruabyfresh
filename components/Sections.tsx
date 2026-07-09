@@ -2,8 +2,8 @@
 
 import { motion } from "motion/react";
 import { Eyebrow, Reveal, Stagger, stagChild } from "./ui";
-import { products } from "@/lib/products";
-import ProductVisual from "./ProductVisual";
+import { getProduct, BRAND } from "@/lib/products";
+import ProductImage from "./ProductImage";
 
 /* ============ WHY CHOOSE ============ */
 const perks = [
@@ -19,7 +19,7 @@ const perks = [
   },
   {
     title: "Premium Ingredients",
-    body: "Sun-ripened berries, Madagascar vanilla and cold-pressed juice. Taste the difference.",
+    body: "Sun-ripened berries, Madagascar vanilla and crunchy granola. Taste the difference.",
     icon: "m12 2 2.4 7.2H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6Z",
   },
   {
@@ -79,10 +79,10 @@ export function WhyChoose() {
 /* ============ GALLERY ============ */
 export function Gallery() {
   const tiles = [
-    products[3], products[0], products[4],
-    products[6], products[1], products[7],
-    products[2], products[5],
-  ];
+    "parfait-330", "strawberry-yoghurt", "parfait-500",
+    "mango-yoghurt", "banana-yoghurt", "parfait-250",
+    "vanilla-yoghurt", "blueberry-yoghurt",
+  ].map(getProduct);
   return (
     <section id="gallery" className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
       <Reveal className="mb-12 text-center">
@@ -111,7 +111,7 @@ export function Gallery() {
               className="absolute inset-0 opacity-60 blur-2xl"
               style={{ background: p.colors[1] }}
             />
-            <ProductVisual product={p} className="relative h-full w-full p-4 transition-transform duration-500 group-hover:scale-110" />
+            <ProductImage product={p} className="relative h-full w-full p-4 transition-transform duration-500 group-hover:scale-110" />
             <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-[var(--color-forest)]/80 to-transparent p-4 text-sm font-medium text-white transition group-hover:translate-y-0">
               {p.name}
             </div>
@@ -187,6 +187,62 @@ export function Reviews() {
   );
 }
 
+/* ============ LAUNCH OFFER ============ */
+export function LaunchOffer() {
+  return (
+    <section id="offer" className="relative mx-auto max-w-6xl px-4 py-16">
+      <Reveal>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="relative overflow-hidden rounded-[32px] bg-[var(--color-rose)] p-8 text-white md:p-10">
+            <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
+            <span className="inline-flex rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest">
+              Launch Offer · Limited time
+            </span>
+            <p className="mt-5 font-display text-6xl font-semibold leading-none">
+              15% <span className="text-3xl">OFF</span>
+            </p>
+            <p className="mt-2 font-display text-2xl font-semibold">On all parfaits</p>
+            <p className="mt-2 max-w-xs text-white/80">
+              Be among the first to enjoy freshness in every layer — 250ml, 330ml
+              & 500ml.
+            </p>
+            <a
+              href="#menu"
+              className="mt-6 inline-flex rounded-full bg-white px-6 py-3 font-semibold text-[var(--color-rose)] transition hover:scale-105"
+            >
+              Pre-order parfaits
+            </a>
+          </div>
+
+          <div className="relative overflow-hidden rounded-[32px] bg-[var(--color-forest)] p-8 text-[var(--color-cream)] md:p-10">
+            <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-[var(--color-leaf)]/25 blur-2xl" />
+            <span className="inline-flex rounded-full bg-white/15 px-4 py-1.5 text-xs font-bold uppercase tracking-widest">
+              500ml Yoghurt Drinks
+            </span>
+            <p className="mt-5 flex items-baseline gap-3">
+              <span className="font-display text-6xl font-semibold leading-none text-[var(--color-leaf)]">
+                ₦2,500
+              </span>
+              <span className="text-2xl text-white/50 line-through">₦3,000</span>
+            </p>
+            <p className="mt-2 font-display text-2xl font-semibold">Every flavour</p>
+            <p className="mt-2 max-w-xs text-white/75">
+              Strawberry, Banana, Vanilla, Mango, Blueberry & Kiwi — rich, creamy
+              & made fresh daily.
+            </p>
+            <a
+              href="#menu"
+              className="mt-6 inline-flex rounded-full bg-[var(--color-leaf)] px-6 py-3 font-semibold text-[var(--color-forest-deep)] transition hover:scale-105"
+            >
+              Pre-order yoghurt
+            </a>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
 /* ============ ORDER CTA (single + bulk) ============ */
 export function OrderCTA() {
   return (
@@ -230,7 +286,9 @@ export function OrderCTA() {
                   12+ units unlock wholesale pricing automatically at checkout.
                 </p>
                 <a
-                  href="https://wa.me/2340000000000?text=Hi%20Ruaby%20Fresh%2C%20I'd%20like%20a%20bulk%20order"
+                  href={`https://wa.me/${BRAND.whatsapp}?text=Hi%20Ruaby%20Fresh%2C%20I'd%20like%20a%20bulk%20order`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="mt-5 inline-flex rounded-full bg-[var(--color-rose)] px-6 py-3 font-semibold text-white transition hover:scale-105"
                 >
                   Chat on WhatsApp
@@ -255,20 +313,35 @@ export function Footer() {
               Ruaby<span className="text-[var(--color-rose)]">Fresh</span>
             </p>
             <p className="mt-2 text-sm text-[var(--color-ink)]/60">
-              Premium yoghurt, parfaits, juices & salads. Fresh Vibes Only —
-              handmade daily in Asaba, Delta State.
+              Handcrafted parfaits & creamy yoghurt drinks. Fresh Vibes Only —
+              made fresh daily in {BRAND.city}.
             </p>
-            <div className="mt-4 flex justify-center gap-3 md:justify-start">
-              {["Instagram", "TikTok", "WhatsApp"].map((s) => (
+            <div className="mt-4 flex flex-wrap justify-center gap-3 md:justify-start">
+              {[
+                { s: "Instagram", href: BRAND.instagram },
+                { s: "TikTok", href: BRAND.tiktok },
+                { s: "Facebook", href: BRAND.facebook },
+              ].map(({ s, href }) => (
                 <a
                   key={s}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="rounded-full bg-white/60 px-4 py-2 text-xs font-semibold text-[var(--color-forest)] transition hover:bg-[var(--color-forest)] hover:text-white"
                 >
                   {s}
                 </a>
               ))}
             </div>
+            <a
+              href={`https://wa.me/${BRAND.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-forest)] hover:text-[var(--color-rose)]"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
+              {BRAND.whatsappDisplay}
+            </a>
           </div>
 
           <div className="grid grid-cols-2 gap-8 text-center md:text-left">
@@ -277,10 +350,10 @@ export function Footer() {
                 Menu
               </p>
               <ul className="space-y-2 text-sm text-[var(--color-ink)]/70">
-                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Yoghurts</a></li>
                 <li><a href="#menu" className="hover:text-[var(--color-rose)]">Parfaits</a></li>
-                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Juices</a></li>
-                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Salads</a></li>
+                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Yoghurt Drinks</a></li>
+                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Launch Offer</a></li>
+                <li><a href="#top" className="hover:text-[var(--color-rose)]">Pre-order</a></li>
               </ul>
             </div>
             <div>

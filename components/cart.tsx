@@ -9,8 +9,12 @@ import {
   type ReactNode,
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { products, formatNaira, type Product } from "@/lib/products";
-import ProductVisual from "./ProductVisual";
+import { formatNaira, LAUNCH_OFFER, type Product } from "@/lib/products";
+import ProductImage from "./ProductImage";
+
+/** Per-unit price given quantity/bulk state and the active launch offer. */
+const unitPrice = (p: Product, bulk: boolean) =>
+  bulk ? p.bulkPrice : LAUNCH_OFFER ? p.launchPrice : p.price;
 
 type Line = { product: Product; qty: number };
 type CartCtx = {
@@ -68,11 +72,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = useMemo(() => lines.reduce((s, l) => s + l.qty, 0), [lines]);
   const bulk = count >= BULK_THRESHOLD;
   const subtotal = useMemo(
-    () =>
-      lines.reduce(
-        (s, l) => s + (bulk ? l.product.bulkPrice : l.product.price) * l.qty,
-        0
-      ),
+    () => lines.reduce((s, l) => s + unitPrice(l.product, bulk) * l.qty, 0),
     [lines, bulk]
   );
 
@@ -113,7 +113,7 @@ function CartDrawer() {
             id: l.product.id,
             name: l.product.name,
             qty: l.qty,
-            price: bulk ? l.product.bulkPrice : l.product.price,
+            price: unitPrice(l.product, bulk),
           })),
         }),
       });
@@ -185,14 +185,14 @@ function CartDrawer() {
                   className="flex items-center gap-3 rounded-2xl bg-white/55 p-3"
                 >
                   <div className="h-16 w-16 shrink-0 rounded-xl bg-[var(--color-cream)]/70">
-                    <ProductVisual product={l.product} className="h-full w-full" />
+                    <ProductImage product={l.product} className="h-full w-full" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-[var(--color-ink)]">
                       {l.product.name}
                     </p>
                     <p className="text-sm text-[var(--color-rose)]">
-                      {formatNaira(bulk ? l.product.bulkPrice : l.product.price)}
+                      {formatNaira(unitPrice(l.product, bulk))}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 rounded-full bg-[var(--color-cream)] px-1 py-1">

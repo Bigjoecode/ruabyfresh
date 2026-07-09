@@ -2,8 +2,8 @@
 
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useState } from "react";
-import { formatNaira, type Product } from "@/lib/products";
-import ProductVisual from "./ProductVisual";
+import { formatNaira, LAUNCH_OFFER, type Product } from "@/lib/products";
+import ProductImage from "./ProductImage";
 import { useCart } from "./cart";
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -56,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
         style={{ transform: "translateZ(45px)" }}
         className="relative mx-auto h-52 w-full"
       >
-        <ProductVisual
+        <ProductImage
           product={product}
           className="h-full w-full transition-transform duration-500 group-hover:scale-105"
         />
@@ -81,11 +81,18 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <div className="mt-4 flex items-center justify-between">
           <div>
-            <p className="font-display text-2xl font-semibold text-[var(--color-forest)]">
-              {formatNaira(product.price)}
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="font-display text-2xl font-semibold text-[var(--color-forest)]">
+                {formatNaira(LAUNCH_OFFER ? product.launchPrice : product.price)}
+              </p>
+              {LAUNCH_OFFER && (
+                <p className="text-sm text-[var(--color-ink)]/40 line-through">
+                  {formatNaira(product.price)}
+                </p>
+              )}
+            </div>
             <p className="text-xs text-[var(--color-rose)]">
-              bulk {formatNaira(product.bulkPrice)} ea
+              bulk {formatNaira(product.bulkPrice)} ea · 12+
             </p>
           </div>
           <button

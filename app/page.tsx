@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
 import Menu from "@/components/Menu";
-import { WhyChoose, Gallery, Reviews, OrderCTA, Footer } from "@/components/Sections";
+import { WhyChoose, Gallery, Reviews, LaunchOffer, OrderCTA, Footer } from "@/components/Sections";
 
 export default function Home() {
   return (
@@ -15,6 +15,7 @@ export default function Home() {
         <Hero />
         <Marquee />
         <Menu />
+        <LaunchOffer />
         <WhyChoose />
         <Gallery />
         <Reviews />
