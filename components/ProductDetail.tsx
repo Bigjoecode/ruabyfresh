@@ -5,6 +5,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import {
   formatNaira,
+  hasBulkDiscount,
   LAUNCH_OFFER,
   products,
   type Product,
@@ -95,9 +96,11 @@ export default function ProductDetail({ product }: { product: Product }) {
                 {formatNaira(product.price)}
               </span>
             )}
-            <span className="mb-1.5 rounded-full bg-[var(--color-rose)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--color-rose)]">
-              bulk {formatNaira(product.bulkPrice)} · 12+
-            </span>
+            {hasBulkDiscount(product) && (
+              <span className="mb-1.5 rounded-full bg-[var(--color-rose)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--color-rose)]">
+                bulk {formatNaira(product.bulkPrice)} · 12+
+              </span>
+            )}
           </div>
 
           {/* qty + add */}

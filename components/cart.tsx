@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   formatNaira,
   displayName,
+  hasBulkDiscount,
   LAUNCH_OFFER,
   BRAND,
   type Product,
@@ -187,8 +188,10 @@ function CartDrawer() {
   const field =
     "w-full rounded-2xl border border-[var(--color-forest)]/15 bg-white/70 px-4 py-3 text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-ink)]/35 focus:border-[var(--color-leaf)] focus:ring-2 focus:ring-[var(--color-leaf)]/30";
 
+  const anyBulk = lines.some((l) => hasBulkDiscount(l.product));
+
   const headings: Record<Step, { title: string; sub: string }> = {
-    cart: { title: "Your basket", sub: `${count} item${count !== 1 ? "s" : ""}${bulk ? " · bulk unlocked" : ""}` },
+    cart: { title: "Your basket", sub: `${count} item${count !== 1 ? "s" : ""}${bulk && anyBulk ? " · bulk unlocked" : ""}` },
     details: { title: "Your details", sub: "Where should it go?" },
     pay: { title: "Pay & confirm", sub: "Transfer, then send on WhatsApp" },
   };
@@ -281,7 +284,7 @@ function CartDrawer() {
                       </div>
                     </div>
                   ))}
-                  {!bulk && lines.length > 0 && (
+                  {!bulk && anyBulk && lines.length > 0 && (
                     <p className="rounded-xl bg-[var(--color-leaf-soft)]/50 px-4 py-2 text-center text-xs text-[var(--color-forest)]">
                       Add {BULK_THRESHOLD - count} more to unlock bulk pricing 💚
                     </p>

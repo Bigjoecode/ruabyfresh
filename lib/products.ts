@@ -58,36 +58,36 @@ const yoghurt = (fruit: string) => ({
 });
 
 export const products: Product[] = [
-  // ---------------- PARFAITS (15% launch offer) ----------------
+  // ---------------- PARFAITS (₦1,000 off launch offer) ----------------
   {
     id: "parfait-500",
     name: "500ml Parfait",
-    variety: "Premium Exotic",
-    tagline: "The ultimate satisfying bowl — a burst of exotic flavour in every spoonful.",
+    variety: "Premium Treat",
+    tagline: "The ultimate satisfying bowl — the perfect balance of taste and nutrition.",
     category: "Parfait",
-    price: 5000,
-    launchPrice: 4250,
-    bulkPrice: 3900,
+    price: 9000,
+    launchPrice: 8000,
+    bulkPrice: 8000,
     size: "500ml",
     image: "/products/parfait-500.png",
-    colors: ["#ffffff", "#ffe08a", "#8bc63f"],
-    badge: "Premium Exotic",
+    colors: ["#ffffff", "#f0a8c0", "#6d4aa0"],
+    badge: "Premium Treat",
     ingredients: PARFAIT_INGREDIENTS,
     benefits: PARFAIT_BENEFITS,
   },
   {
     id: "parfait-330",
     name: "330ml Parfait",
-    variety: "Premium Treat",
-    tagline: "Just the right size — the perfect balance of taste and nutrition.",
+    variety: "Premium Exotic",
+    tagline: "Just the right size — a burst of exotic flavour in every spoonful.",
     category: "Parfait",
-    price: 3500,
-    launchPrice: 2975,
-    bulkPrice: 2700,
+    price: 6500,
+    launchPrice: 5500,
+    bulkPrice: 5500,
     size: "330ml",
     image: "/products/parfait-330.png",
-    colors: ["#ffffff", "#f0a8c0", "#6d4aa0"],
-    badge: "Signature",
+    colors: ["#ffffff", "#ffe08a", "#8bc63f"],
+    badge: "Premium Exotic",
     ingredients: PARFAIT_INGREDIENTS,
     benefits: PARFAIT_BENEFITS,
   },
@@ -97,12 +97,13 @@ export const products: Product[] = [
     variety: "Tropical Delight",
     tagline: "Perfect for a light & healthy treat — tropical freshness that brightens your day.",
     category: "Parfait",
-    price: 2500,
-    launchPrice: 2125,
-    bulkPrice: 1900,
+    price: 4500,
+    launchPrice: 3500,
+    bulkPrice: 3500,
     size: "250ml",
     image: "/products/parfait-250.png",
     colors: ["#ffffff", "#f7b8d4", "#e64b4b"],
+    badge: "Tropical Delight",
     ingredients: PARFAIT_INGREDIENTS,
     benefits: PARFAIT_BENEFITS,
   },
@@ -115,7 +116,7 @@ export const products: Product[] = [
     category: "Yoghurt",
     price: 3000,
     launchPrice: 2500,
-    bulkPrice: 2200,
+    bulkPrice: 2500,
     size: "500ml",
     image: "/products/strawberry-yoghurt.png",
     colors: ["#ffd7e6", "#f06aa0", "#e64b4b"],
@@ -129,7 +130,7 @@ export const products: Product[] = [
     category: "Yoghurt",
     price: 3000,
     launchPrice: 2500,
-    bulkPrice: 2200,
+    bulkPrice: 2500,
     size: "500ml",
     image: "/products/banana-yoghurt.png",
     colors: ["#fff4c2", "#ffe08a", "#e9c94a"],
@@ -142,7 +143,7 @@ export const products: Product[] = [
     category: "Yoghurt",
     price: 3000,
     launchPrice: 2500,
-    bulkPrice: 2200,
+    bulkPrice: 2500,
     size: "500ml",
     image: "/products/vanilla-yoghurt.png",
     colors: ["#fffaf0", "#f6ecd6", "#e6d4a8"],
@@ -155,7 +156,7 @@ export const products: Product[] = [
     category: "Yoghurt",
     price: 3000,
     launchPrice: 2500,
-    bulkPrice: 2200,
+    bulkPrice: 2500,
     size: "500ml",
     image: "/products/mango-yoghurt.png",
     colors: ["#ffe9b0", "#ffc84a", "#ff9a2e"],
@@ -168,7 +169,7 @@ export const products: Product[] = [
     category: "Yoghurt",
     price: 3000,
     launchPrice: 2500,
-    bulkPrice: 2200,
+    bulkPrice: 2500,
     size: "500ml",
     image: "/products/blueberry-yoghurt.png",
     colors: ["#dcd0f0", "#9a7ad0", "#6d4aa0"],
@@ -181,7 +182,7 @@ export const products: Product[] = [
     category: "Yoghurt",
     price: 3000,
     launchPrice: 2500,
-    bulkPrice: 2200,
+    bulkPrice: 2500,
     size: "500ml",
     image: "/products/kiwi-yoghurt.png",
     colors: ["#e8f6d2", "#a8d85a", "#4e8a2b"],
@@ -197,6 +198,10 @@ export const getProduct = (id: string) =>
 /** Product name for order lines — avoids duplicating the size (e.g. "500ml Parfait"). */
 export const displayName = (p: Product) =>
   p.name.includes(p.size) ? p.name : `${p.name} · ${p.size}`;
+
+/** True when 12+ orders actually cost less than the current single price. */
+export const hasBulkDiscount = (p: Product) =>
+  p.bulkPrice < (LAUNCH_OFFER ? p.launchPrice : p.price);
 
 export function formatNaira(n: number) {
   return `${NAIRA}${n.toLocaleString("en-NG")}`;

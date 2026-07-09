@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useState } from "react";
-import { formatNaira, LAUNCH_OFFER, type Product } from "@/lib/products";
+import { formatNaira, hasBulkDiscount, LAUNCH_OFFER, type Product } from "@/lib/products";
 import ProductImage from "./ProductImage";
 import { useCart } from "./cart";
 
@@ -96,9 +96,11 @@ export default function ProductCard({ product }: { product: Product }) {
                 </p>
               )}
             </div>
-            <p className="text-xs text-[var(--color-rose)]">
-              bulk {formatNaira(product.bulkPrice)} ea · 12+
-            </p>
+            {hasBulkDiscount(product) && (
+              <p className="text-xs text-[var(--color-rose)]">
+                bulk {formatNaira(product.bulkPrice)} ea · 12+
+              </p>
+            )}
           </div>
           <button
             onClick={handleAdd}

@@ -199,12 +199,12 @@ export function LaunchOffer() {
               Launch Offer · Limited time
             </span>
             <p className="mt-5 font-display text-6xl font-semibold leading-none">
-              15% <span className="text-3xl">OFF</span>
+              ₦1,000 <span className="text-3xl">OFF</span>
             </p>
-            <p className="mt-2 font-display text-2xl font-semibold">On all parfaits</p>
+            <p className="mt-2 font-display text-2xl font-semibold">Every parfait</p>
             <p className="mt-2 max-w-xs text-white/80">
               Be among the first to enjoy freshness in every layer — 250ml, 330ml
-              & 500ml.
+              &amp; 500ml, ₦1,000 off each.
             </p>
             <a
               href="#menu"
