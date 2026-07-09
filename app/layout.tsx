@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Jost } from "next/font/google";
 import "./globals.css";
-import { CartProvider } from "@/components/cart";
-import { Aurora } from "@/components/ui";
-import Navbar from "@/components/Navbar";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -60,11 +57,7 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
-        <CartProvider>
-          <Aurora />
-          <Navbar />
-          {children}
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

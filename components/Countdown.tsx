@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { LAUNCH_DATE } from "@/lib/products";
 
-function diff() {
-  const ms = Math.max(0, LAUNCH_DATE.getTime() - Date.now());
+function diff(target: number) {
+  const ms = Math.max(0, target - Date.now());
   return {
     days: Math.floor(ms / 86400000),
     hours: Math.floor((ms / 3600000) % 24),
@@ -14,14 +14,21 @@ function diff() {
   };
 }
 
-export default function Countdown({ compact = false }: { compact?: boolean }) {
+export default function Countdown({
+  date,
+  compact = false,
+}: {
+  date?: string;
+  compact?: boolean;
+}) {
+  const target = (date ? new Date(date) : LAUNCH_DATE).getTime();
   const [t, setT] = useState<ReturnType<typeof diff> | null>(null);
 
   useEffect(() => {
-    setT(diff());
-    const i = setInterval(() => setT(diff()), 1000);
+    setT(diff(target));
+    const i = setInterval(() => setT(diff(target)), 1000);
     return () => clearInterval(i);
-  }, []);
+  }, [target]);
 
   // Avoid hydration mismatch — render nothing until mounted.
   if (!t) return <div className={compact ? "h-8" : "h-20"} aria-hidden />;

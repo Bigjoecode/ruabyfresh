@@ -11,16 +11,21 @@ import {
   Footer,
 } from "@/components/Sections";
 import { Eyebrow, Reveal } from "@/components/ui";
+import { getProducts, getSettings } from "@/lib/data";
 
-export default function Home() {
+export const revalidate = 30;
+
+export default async function Home() {
+  const [products, settings] = await Promise.all([getProducts(), getSettings()]);
+
   return (
     <main>
-      <Hero />
+      <Hero products={products} settings={settings} />
       <Marquee />
-      <Menu />
-      <LaunchOffer />
+      <Menu products={products} />
+      <LaunchOffer offer={settings.offer} launchOffer={settings.launchOffer} />
       <WhyChoose />
-      <Gallery />
+      <Gallery products={products} />
       <Reviews />
 
       <section id="preorder" className="relative mx-auto max-w-3xl px-4 py-24 md:py-28">
@@ -35,7 +40,7 @@ export default function Home() {
           </p>
         </Reveal>
         <Reveal>
-          <PreorderForm />
+          <PreorderForm products={products} />
         </Reveal>
       </section>
 

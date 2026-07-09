@@ -2,7 +2,8 @@
 
 import { motion } from "motion/react";
 import { Eyebrow, Reveal, Stagger, stagChild } from "./ui";
-import { getProduct, BRAND } from "@/lib/products";
+import { BRAND, type Product } from "@/lib/products";
+import type { Settings } from "@/lib/types";
 import ProductImage from "./ProductImage";
 
 /* ============ WHY CHOOSE ============ */
@@ -77,11 +78,12 @@ export function WhyChoose() {
 }
 
 /* ============ GALLERY ============ */
-export function Gallery() {
-  const tiles = [
-    "parfait-330", "strawberry-yoghurt", "parfait-500",
-    "banana-yoghurt", "parfait-250", "vanilla-yoghurt",
-  ].map(getProduct);
+export function Gallery({ products }: { products: Product[] }) {
+  // Fill ~6 tiles by cycling through whatever products exist.
+  const tiles = products.length
+    ? Array.from({ length: Math.min(8, Math.max(4, products.length)) }, (_, i) => products[i % products.length])
+    : [];
+  if (tiles.length === 0) return null;
   return (
     <section id="gallery" className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
       <Reveal className="mb-12 text-center">
@@ -187,7 +189,14 @@ export function Reviews() {
 }
 
 /* ============ LAUNCH OFFER ============ */
-export function LaunchOffer() {
+export function LaunchOffer({
+  offer,
+  launchOffer,
+}: {
+  offer: Settings["offer"];
+  launchOffer: boolean;
+}) {
+  if (!launchOffer) return null;
   return (
     <section id="offer" className="relative mx-auto max-w-6xl px-4 py-16">
       <Reveal>
@@ -195,16 +204,13 @@ export function LaunchOffer() {
           <div className="relative overflow-hidden rounded-[32px] bg-[var(--color-rose)] p-8 text-white md:p-10">
             <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
             <span className="inline-flex rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest">
-              Launch Offer · Limited time
+              {offer.parfaitBadge}
             </span>
             <p className="mt-5 font-display text-6xl font-semibold leading-none">
-              ₦1,000 <span className="text-3xl">OFF</span>
+              {offer.parfaitAmount}
             </p>
-            <p className="mt-2 font-display text-2xl font-semibold">Every parfait</p>
-            <p className="mt-2 max-w-xs text-white/80">
-              Be among the first to enjoy freshness in every layer — 250ml, 330ml
-              &amp; 500ml, ₦1,000 off each.
-            </p>
+            <p className="mt-2 font-display text-2xl font-semibold">{offer.parfaitHeading}</p>
+            <p className="mt-2 max-w-xs text-white/80">{offer.parfaitSub}</p>
             <a
               href="#menu"
               className="mt-6 inline-flex rounded-full bg-white px-6 py-3 font-semibold text-[var(--color-rose)] transition hover:scale-105"
@@ -220,15 +226,12 @@ export function LaunchOffer() {
             </span>
             <p className="mt-5 flex items-baseline gap-3">
               <span className="font-display text-6xl font-semibold leading-none text-[var(--color-leaf)]">
-                ₦2,500
+                {offer.yoghurtNow}
               </span>
-              <span className="text-2xl text-white/50 line-through">₦3,000</span>
+              <span className="text-2xl text-white/50 line-through">{offer.yoghurtWas}</span>
             </p>
             <p className="mt-2 font-display text-2xl font-semibold">Every flavour</p>
-            <p className="mt-2 max-w-xs text-white/75">
-              Strawberry, Banana & Vanilla — rich, creamy
-              & made fresh daily.
-            </p>
+            <p className="mt-2 max-w-xs text-white/75">{offer.yoghurtSub}</p>
             <a
               href="#menu"
               className="mt-6 inline-flex rounded-full bg-[var(--color-leaf)] px-6 py-3 font-semibold text-[var(--color-forest-deep)] transition hover:scale-105"

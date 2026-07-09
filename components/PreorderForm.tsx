@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import {
-  products,
+  products as seedProducts,
   formatNaira,
   displayName,
   LAUNCH_OFFER,
   BRAND,
   type Product,
 } from "@/lib/products";
-import { submitOrder, orderRef } from "@/lib/order";
+import { submitOrder, storeOrder, orderRef } from "@/lib/order";
 import BankDetails from "./BankDetails";
 
 /**
@@ -19,12 +19,15 @@ import BankDetails from "./BankDetails";
  */
 export default function PreorderForm({
   product,
+  products,
   compact = false,
 }: {
   product?: Product;
+  products?: Product[];
   compact?: boolean;
 }) {
-  const [selectedId, setSelectedId] = useState(product?.id ?? products[0].id);
+  const list = products ?? seedProducts;
+  const [selectedId, setSelectedId] = useState(product?.id ?? list[0]?.id ?? "");
   const [qty, setQty] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -35,7 +38,7 @@ export default function PreorderForm({
   const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
 
-  const chosen = product ?? products.find((p) => p.id === selectedId)!;
+  const chosen = product ?? list.find((p) => p.id === selectedId) ?? list[0];
   const unit = LAUNCH_OFFER ? chosen.launchPrice : chosen.price;
   const total = unit * qty;
   const valid =
@@ -53,26 +56,14 @@ export default function PreorderForm({
     setTouched(true);
     if (!valid || !receiptFile) return;
     const reference = orderRef();
-    submitOrder(
-      {
-        reference,
-        total,
-        lines: [{ name: displayName(chosen), qty, price: unit }],
-        customer: { name, phone, type, address, note },
-      },
-      receiptFile
-    );
-    // Fire-and-forget record for the team's logs.
-    fetch("/api/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reference,
-        total,
-        lines: [{ id: chosen.id, name: chosen.name, qty, price: unit }],
-        customer: { name, phone },
-      }),
-    }).catch(() => {});
+    const order = {
+      reference,
+      total,
+      lines: [{ name: displayName(chosen), qty, price: unit }],
+      customer: { name, phone, type, address, note },
+    };
+    storeOrder(order, receiptFile).catch(() => {});
+    submitOrder(order, receiptFile);
   };
 
   const field =
@@ -93,7 +84,7 @@ export default function PreorderForm({
               className={field}
             >
               <optgroup label="Parfaits">
-                {products
+                {list
                   .filter((p) => p.category === "Parfait")
                   .map((p) => (
                     <option key={p.id} value={p.id}>
@@ -102,7 +93,7 @@ export default function PreorderForm({
                   ))}
               </optgroup>
               <optgroup label="Yoghurt Drinks (500ml)">
-                {products
+                {list
                   .filter((p) => p.category === "Yoghurt")
                   .map((p) => (
                     <option key={p.id} value={p.id}>

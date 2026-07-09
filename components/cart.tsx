@@ -18,7 +18,7 @@ import {
   BRAND,
   type Product,
 } from "@/lib/products";
-import { submitOrder, orderRef, type Customer } from "@/lib/order";
+import { submitOrder, storeOrder, orderRef, type Customer } from "@/lib/order";
 import ProductImage from "./ProductImage";
 import BankDetails from "./BankDetails";
 
@@ -154,35 +154,21 @@ function CartDrawer() {
     if (!receiptFile) return; // receipt is required
     const reference = orderRef();
     const customer: Customer = { name, phone, type, address, note };
-    submitOrder(
-      {
-        reference,
-        total: subtotal,
-        bulk,
-        customer,
-        lines: lines.map((l) => ({
-          name: displayName(l.product),
-          qty: l.qty,
-          price: unitPrice(l.product, bulk),
-        })),
-      },
-      receiptFile
-    );
-    fetch("/api/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reference,
-        total: subtotal,
-        lines: lines.map((l) => ({
-          id: l.product.id,
-          name: l.product.name,
-          qty: l.qty,
-          price: unitPrice(l.product, bulk),
-        })),
-        customer: { name, phone },
-      }),
-    }).catch(() => {});
+    const order = {
+      reference,
+      total: subtotal,
+      bulk,
+      customer,
+      lines: lines.map((l) => ({
+        name: displayName(l.product),
+        qty: l.qty,
+        price: unitPrice(l.product, bulk),
+      })),
+    };
+    // Save to the admin dashboard (with receipt), then hand off to WhatsApp.
+    storeOrder(order, receiptFile).catch(() => {});
+    submitOrder(order, receiptFile);
+    setOpen(false);
   };
 
   const field =

@@ -7,7 +7,6 @@ import {
   formatNaira,
   hasBulkDiscount,
   LAUNCH_OFFER,
-  products,
   type Product,
 } from "@/lib/products";
 import ProductImage from "./ProductImage";
@@ -15,13 +14,19 @@ import ProductCard from "./ProductCard";
 import PreorderForm from "./PreorderForm";
 import { useCart } from "./cart";
 
-export default function ProductDetail({ product }: { product: Product }) {
+export default function ProductDetail({
+  product,
+  allProducts = [],
+}: {
+  product: Product;
+  allProducts?: Product[];
+}) {
   const { add, setOpen } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
   const unit = LAUNCH_OFFER ? product.launchPrice : product.price;
-  const related = products
+  const related = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 3);
 

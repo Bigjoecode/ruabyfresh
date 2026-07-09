@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { products, categories } from "@/lib/products";
+import { categories, type Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
 import { Eyebrow, Reveal } from "./ui";
 
-export default function Menu() {
+export default function Menu({ products }: { products: Product[] }) {
   const [active, setActive] = useState<(typeof categories)[number]>("All");
   const shown =
     active === "All" ? products : products.filter((p) => p.category === active);

@@ -61,6 +61,18 @@ export function whatsappUrl(message: string) {
 }
 
 /**
+ * Saves the order + receipt to the admin (via /api/order). Fire-and-forget:
+ * returns the fetch promise so callers can .catch() but need not await
+ * (so the WhatsApp share stays within the click's user-gesture window).
+ */
+export function storeOrder(order: OrderInput, receipt: File) {
+  const fd = new FormData();
+  fd.append("payload", JSON.stringify(order));
+  fd.append("receipt", receipt);
+  return fetch("/api/order", { method: "POST", body: fd });
+}
+
+/**
  * Sends the order. On devices that support sharing files (most phones), this
  * opens the native share sheet with the receipt image AND the order text so
  * the customer can send both to Ruaby Fresh on WhatsApp in one tap. On

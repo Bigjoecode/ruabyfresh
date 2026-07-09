@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { products, formatNaira, LAUNCH_OFFER } from "@/lib/products";
+import { formatNaira, LAUNCH_OFFER } from "@/lib/products";
+import { getProducts, getProductById } from "@/lib/data";
 import ProductDetail from "@/components/ProductDetail";
 
-export function generateStaticParams() {
+export const revalidate = 30;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const products = await getProducts();
   return products.map((p) => ({ id: p.id }));
 }
 
@@ -13,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const product = products.find((p) => p.id === id);
+  const product = await getProductById(id);
   if (!product) return { title: "Ruaby Fresh" };
   const price = LAUNCH_OFFER ? product.launchPrice : product.price;
   return {
@@ -28,7 +33,8 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const products = await getProducts();
   const product = products.find((p) => p.id === id);
   if (!product) notFound();
-  return <ProductDetail product={product} />;
+  return <ProductDetail product={product} allProducts={products} />;
 }

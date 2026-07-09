@@ -2,20 +2,27 @@
 
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
-import { getProduct } from "@/lib/products";
+import type { Product } from "@/lib/products";
+import type { Settings } from "@/lib/types";
 import ProductImage from "./ProductImage";
 import FreshDrip from "./FreshDrip";
 import Countdown from "./Countdown";
 import { useCart } from "./cart";
 
-const floatSpots = [
-  { id: "parfait-330", top: "16%", left: "5%", size: 168, r: -8, dur: 8 },
-  { id: "strawberry-yoghurt", top: "22%", right: "6%", size: 150, r: 7, dur: 9 },
-  { id: "parfait-500", bottom: "12%", left: "10%", size: 150, r: 5, dur: 10 },
-  { id: "banana-yoghurt", bottom: "18%", right: "9%", size: 140, r: -6, dur: 11 },
+const SPOTS = [
+  { top: "16%", left: "5%", size: 168, r: -8, dur: 8 },
+  { top: "22%", right: "6%", size: 150, r: 7, dur: 9 },
+  { bottom: "12%", left: "10%", size: 150, r: 5, dur: 10 },
+  { bottom: "18%", right: "9%", size: 140, r: -6, dur: 11 },
 ];
 
-export default function Hero() {
+export default function Hero({
+  products,
+  settings,
+}: {
+  products: Product[];
+  settings: Settings;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -27,7 +34,10 @@ export default function Hero() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const { add, setOpen } = useCart();
 
-  const signature = getProduct("parfait-330");
+  const hero = settings.hero;
+  const signature =
+    products.find((p) => p.category === "Parfait") ?? products[0];
+  const overrides = hero.floatingImages.filter(Boolean);
 
   return (
     <section
@@ -35,31 +45,38 @@ export default function Hero() {
       id="top"
       className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-4 pt-28 text-center"
     >
-      <FreshDrip />
+      {hero.backgroundImage && (
+        <div className="pointer-events-none absolute inset-0 -z-[1]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={hero.backgroundImage} alt="" className="h-full w-full object-cover opacity-30" />
+          <div className="absolute inset-0 bg-[var(--color-cream)]/40" />
+        </div>
+      )}
 
-      {/* soft product glow collage behind everything */}
-      <div className="pointer-events-none absolute inset-0 -z-0 opacity-40 blur-2xl">
-        <div className="absolute left-[14%] top-[30%] h-52 w-52 -translate-x-1/2">
-          <ProductImage product={getProduct("parfait-500")} className="h-full w-full" />
-        </div>
-        <div className="absolute right-[14%] top-[40%] h-56 w-40">
-          <ProductImage product={getProduct("vanilla-yoghurt")} className="h-full w-full" />
-        </div>
-      </div>
+      {hero.showDrip && <FreshDrip />}
 
       {/* floating products (desktop) */}
       <motion.div style={{ y: yHero }} className="absolute inset-0 z-10 hidden lg:block">
-        {floatSpots.map((s, i) => (
-          <motion.div
-            key={i}
-            className="absolute drop-shadow-[0_30px_40px_rgba(18,60,27,0.25)]"
-            style={{ top: s.top, bottom: s.bottom, left: s.left, right: s.right, width: s.size }}
-            animate={{ y: [0, -22, 0], rotate: [s.r, s.r + 3, s.r] }}
-            transition={{ duration: s.dur, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <ProductImage product={getProduct(s.id)} className="w-full" />
-          </motion.div>
-        ))}
+        {SPOTS.map((s, i) => {
+          const override = overrides[i];
+          const product = products[i % Math.max(1, products.length)];
+          return (
+            <motion.div
+              key={i}
+              className="absolute drop-shadow-[0_30px_40px_rgba(18,60,27,0.25)]"
+              style={{ top: s.top, bottom: s.bottom, left: s.left, right: s.right, width: s.size }}
+              animate={{ y: [0, -22, 0], rotate: [s.r, s.r + 3, s.r] }}
+              transition={{ duration: s.dur, repeat: Infinity, ease: "easeInOut" }}
+            >
+              {override ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={override} alt="" className="w-full" />
+              ) : product ? (
+                <ProductImage product={product} className="w-full" />
+              ) : null}
+            </motion.div>
+          );
+        })}
       </motion.div>
 
       <motion.div style={{ y: yTitle, opacity }} className="relative z-20 max-w-4xl">
@@ -70,7 +87,7 @@ export default function Hero() {
           className="mb-6 inline-flex items-center gap-2 rounded-full glass px-5 py-2 text-sm font-semibold text-[var(--color-forest)]"
         >
           <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-rose)]" />
-          Launching 14 July 2026 · Pre-order now
+          {hero.badge}
         </motion.div>
 
         <h1 className="font-display text-[clamp(3rem,10vw,7rem)] font-semibold leading-[0.95] text-[var(--color-forest)]">
@@ -80,7 +97,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            Fresh Vibes
+            {hero.titleTop}
           </motion.span>
           <motion.span
             className="block italic text-gradient"
@@ -88,7 +105,7 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            Only.
+            {hero.titleBottom}
           </motion.span>
         </h1>
 
@@ -98,11 +115,9 @@ export default function Hero() {
           transition={{ delay: 0.7, duration: 0.8 }}
           className="mx-auto mt-6 max-w-xl text-lg text-[var(--color-ink)]/70"
         >
-          Handcrafted parfaits & creamy yoghurt drinks — layered by hand, made
-          fresh daily, and never touched by artificial preservatives.
+          {hero.subtitle}
         </motion.p>
 
-        {/* countdown */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -112,7 +127,7 @@ export default function Hero() {
           <span className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-forest)]/60">
             The wait is almost over
           </span>
-          <Countdown />
+          <Countdown date={settings.launchDate} />
         </motion.div>
 
         <motion.div
@@ -128,15 +143,17 @@ export default function Hero() {
             <span className="relative z-10">Pre-order Now</span>
             <span className="absolute inset-0 shine opacity-0 transition group-hover:opacity-100" />
           </a>
-          <button
-            onClick={() => {
-              add(signature);
-              setOpen(true);
-            }}
-            className="rounded-full glass px-8 py-4 font-semibold text-[var(--color-forest)] transition hover:scale-105 active:scale-95"
-          >
-            Try the Signature Parfait
-          </button>
+          {signature && (
+            <button
+              onClick={() => {
+                add(signature);
+                setOpen(true);
+              }}
+              className="rounded-full glass px-8 py-4 font-semibold text-[var(--color-forest)] transition hover:scale-105 active:scale-95"
+            >
+              Try the Signature Parfait
+            </button>
+          )}
         </motion.div>
 
         <motion.div
@@ -155,16 +172,17 @@ export default function Hero() {
       </motion.div>
 
       {/* mobile hero product */}
-      <motion.div
-        style={{ scale }}
-        className="relative z-10 mt-10 w-52 lg:hidden"
-        animate={{ y: [0, -16, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <ProductImage product={signature} className="w-full drop-shadow-2xl" />
-      </motion.div>
+      {signature && (
+        <motion.div
+          style={{ scale }}
+          className="relative z-10 mt-10 w-52 lg:hidden"
+          animate={{ y: [0, -16, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <ProductImage product={signature} className="w-full drop-shadow-2xl" />
+        </motion.div>
+      )}
 
-      {/* scroll cue */}
       <motion.div
         className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2"
         animate={{ y: [0, 8, 0] }}
