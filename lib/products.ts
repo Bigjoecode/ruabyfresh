@@ -24,8 +24,8 @@ export const LAUNCH_DATE = new Date("2026-07-14T09:00:00+01:00");
 export const LAUNCH_OFFER = true;
 
 export const BRAND = {
-  whatsapp: "2347036899441",
-  whatsappDisplay: "0703 689 9441",
+  whatsapp: "2347036892225",
+  whatsappDisplay: "0703 689 2225",
   instagram: "https://instagram.com/ruabyfresh",
   tiktok: "https://tiktok.com/@ruabyfresh",
   facebook: "https://facebook.com/ruabyfresh",
