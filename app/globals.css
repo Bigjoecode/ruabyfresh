@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/* ================= Ruaby Fresh — Design Tokens ================= */
+@theme {
+  /* Brand palette pulled from the logo */
+  --color-forest: #1f5e2a;      /* deep script green   */
+  --color-forest-deep: #123c1b; /* darkest green        */
+  --color-leaf: #8bc63f;        /* lime / leaf green    */
+  --color-leaf-soft: #c7e59a;   /* pale lime            */
+  --color-rose: #e85d9a;        /* FRESH pink accent    */
+  --color-rose-soft: #f7b8d4;   /* pale pink            */
+  --color-berry: #6d4aa0;       /* blueberry purple     */
+  --color-strawberry: #e64b4b;  /* strawberry red       */
+  --color-cream: #f7f3e6;       /* base background      */
+  --color-cream-deep: #efe7d2;  /* warmer cream         */
+  --color-ink: #1b2a1e;         /* body text            */
+
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-glass: 28px;
+
+  /* Cinematic easing */
+  --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-aurora: aurora 18s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 11s ease-in-out infinite;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-shimmer: shimmer 3s linear infinite;
+  --animate-spin-slow: spin 26s linear infinite;
+}
+
+@keyframes aurora {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  33%      { transform: translate3d(6%, -4%, 0) scale(1.15); }
+  66%      { transform: translate3d(-5%, 5%, 0) scale(1.08); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50%      { transform: translateY(-22px) rotate(var(--r, 0deg)); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ================= Base ================= */
+* { -webkit-font-smoothing: antialiased; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+::selection { background: var(--color-rose); color: white; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-cream-deep); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--color-forest), var(--color-leaf));
+  border-radius: 99px;
+}
+
+/* ================= Utilities ================= */
+@utility glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 20px 60px -20px rgba(18, 60, 27, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+@utility glass-dark {
+  background: rgba(18, 60, 27, 0.28);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.4);
+}
+
+@utility text-gradient {
+  background: linear-gradient(120deg, var(--color-forest), var(--color-leaf) 60%, var(--color-rose));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility shine {
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 80%
+  );
+  background-size: 200% auto;
+  animation: var(--animate-shimmer);
+}
+
+.font-display { font-family: var(--font-display); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
