@@ -1,18 +1,20 @@
 # Ruaby Fresh 🍓🌿
 
-> **Fresh Vibes Only.** Premium yoghurt, parfaits, juices & salads — made fresh daily in Asaba.
+> **Fresh Vibes Only.** Handcrafted parfaits & creamy yoghurt drinks — made fresh daily in Asaba.
 
 A cinematic, glassmorphism e-commerce experience built for the Ruaby Fresh brand.
-Deployed on Vercel → [ruabyfresh.vercel.app](https://ruabyfresh.vercel.app)
+Launching **14 July 2026**. Deployed on Vercel → [ruabyfresh.vercel.app](https://ruabyfresh.vercel.app)
 
 ## ✨ What's inside
 
-- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
 - **Tailwind CSS v4** with brand design tokens pulled straight from the logo
-- **Motion** (Framer) — parallax hero, scroll-reveal, 3D tilt cards, animated cart
+- **Motion** (Framer) — parallax hero, dripping "fresh vibes" background, scroll-reveal,
+  3D-tilt cards, launch countdown, animated multi-step cart
 - **Liquid-glass / glassmorphism** UI, aurora mesh-gradient background
-- **Nomba** payment gateway integration (single + bulk orders, auto bulk pricing)
-- Procedural SVG product visuals — swap for real photography anytime (see below)
+- **Individual flavour pages** (`/product/[id]`) with a "What's inside" panel
+- **Bank-transfer checkout** + receipt upload → order sent to WhatsApp
+- Procedural SVG product visuals that auto-swap for real photos (see below)
 
 ## 🎨 Brand palette (from the logo)
 
@@ -25,6 +27,21 @@ Deployed on Vercel → [ruabyfresh.vercel.app](https://ruabyfresh.vercel.app)
 
 Typography: **Fraunces** (display serif) + **Jost** (sans).
 
+## 🍨 Products
+
+- **Parfaits** — 250ml, 330ml, 500ml (15% launch offer)
+- **Yoghurt Drinks** — 500ml bottles: Strawberry, Banana, Vanilla, Mango, Blueberry, Kiwi (₦3,000 → ₦2,500)
+
+Edit everything (prices, flavours, ingredients, bank details, socials) in
+[`lib/products.ts`](lib/products.ts).
+
+## 💳 Payment — bank transfer
+
+Customers check out by transferring to the account shown at checkout
+(**Access Bank · 1830512383 · Ruaby Enterprise**), then send the order + receipt on
+WhatsApp. No payment gateway or API keys required. The order is also logged via
+[`app/api/order/route.ts`](app/api/order/route.ts) (extend to email/DB anytime).
+
 ## 🚀 Local development
 
 ```bash
@@ -33,27 +50,17 @@ npm run dev        # http://localhost:3000
 npm run build      # production build
 ```
 
-## 💳 Nomba setup
-
-1. Copy `.env.example` → `.env.local`
-2. Add your keys from the [Nomba dashboard](https://dashboard.nomba.com):
-   `NOMBA_CLIENT_ID`, `NOMBA_PRIVATE_KEY`, `NOMBA_ACCOUNT_ID`
-3. The checkout flow lives in [`app/api/checkout/route.ts`](app/api/checkout/route.ts).
-   Bulk pricing unlocks automatically at 12+ items.
-
 ## 📸 Swapping in real product photos
 
-The catalogue lives in [`lib/products.ts`](lib/products.ts). Each product currently
-renders a procedural SVG (`components/ProductVisual.tsx`). To use real photos:
-
-1. Drop images in `public/products/`
-2. Add an `image` field to each product and render `<Image>` instead of `<ProductVisual>`
-   in `components/ProductCard.tsx`.
+Drop images into [`public/products/`](public/products/) using the exact file names in
+[`public/products/README.txt`](public/products/README.txt) (e.g. `parfait-330.png`,
+`strawberry-yoghurt.png`). The site shows the real photo automatically and falls back to
+the illustrated SVG when a photo is missing — no code changes needed.
 
 ## ▲ Deploy to Vercel
 
-Push to GitHub, import the repo at [vercel.com/new](https://vercel.com/new), add the
-Nomba env vars, and deploy. Every push to `main` auto-deploys.
+Push to GitHub and it deploys to [ruabyfresh.vercel.app](https://ruabyfresh.vercel.app).
+(Connect the repo in Vercel → Settings → Git for push-to-deploy.)
 
 ---
 

@@ -6,11 +6,11 @@ import { useState } from "react";
 import { useCart } from "./cart";
 
 const links = [
-  { label: "Menu", href: "#menu" },
-  { label: "Offer", href: "#offer" },
-  { label: "Why Us", href: "#why" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Reviews", href: "#reviews" },
+  { label: "Menu", href: "/#menu" },
+  { label: "Offer", href: "/#offer" },
+  { label: "Why Us", href: "/#why" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "Pre-order", href: "/#preorder" },
 ];
 
 export default function Navbar() {
@@ -32,7 +32,7 @@ export default function Navbar() {
           scrolled ? "glass" : "bg-transparent"
         }`}
       >
-        <a href="#top" className="flex items-center gap-2 pl-2">
+        <a href="/" className="flex items-center gap-2 pl-2">
           <Image
             src="/ruaby-logo.webp"
             alt="Ruaby Fresh"

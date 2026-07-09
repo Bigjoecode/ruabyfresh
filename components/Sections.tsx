@@ -259,8 +259,8 @@ export function OrderCTA() {
               <span className="italic text-[var(--color-leaf)]"> dose of fresh?</span>
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-[var(--color-cream)]/70">
-              Single cups or bulk trays for events, offices and stores — pay securely
-              with Nomba and we handle the rest.
+              Single cups or bulk trays for events, offices and stores — pay by bank
+              transfer, send your receipt on WhatsApp, and we handle the rest.
             </p>
 
             <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
@@ -372,7 +372,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[var(--color-forest)]/10 pt-6 text-xs text-[var(--color-ink)]/50 md:flex-row">
           <p>© {new Date().getFullYear()} Ruaby Fresh. All rights reserved.</p>
-          <p>Payments secured by Nomba · Made with 💚 in Asaba</p>
+          <p>Pay by bank transfer · Made with 💚 in Asaba</p>
         </div>
       </div>
     </footer>

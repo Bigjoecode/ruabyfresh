@@ -13,6 +13,8 @@ export type Product = {
   image: string; // /products/<id>.png — swap in real photography anytime
   colors: [string, string, string]; // fallback SVG colour stops
   badge?: string;
+  ingredients: string[];
+  benefits: string[];
 };
 
 export const NAIRA = "₦";
@@ -29,7 +31,31 @@ export const BRAND = {
   facebook: "https://facebook.com/ruabyfresh",
   handle: "@ruabyfresh",
   city: "Asaba, Delta State",
+  bank: {
+    number: "1830512383",
+    name: "Access Bank",
+    account: "Ruaby Enterprise",
+  },
 };
+
+const PARFAIT_INGREDIENTS = [
+  "Creamy set yoghurt",
+  "House-made crunchy granola",
+  "Fresh seasonal fruit",
+  "Golden natural honey",
+  "Mixed nuts & seeds",
+];
+const PARFAIT_BENEFITS = ["High in protein", "Rich in nutrients", "Goodness in every layer"];
+
+const yoghurt = (fruit: string) => ({
+  ingredients: [
+    "Fresh cultured milk",
+    `Real ${fruit}`,
+    "A touch of natural sweetness",
+    "No artificial preservatives",
+  ],
+  benefits: ["Rich & creamy", "Made fresh daily", "Healthy & nourishing"],
+});
 
 export const products: Product[] = [
   // ---------------- PARFAITS (15% launch offer) ----------------
@@ -46,6 +72,8 @@ export const products: Product[] = [
     image: "/products/parfait-500.png",
     colors: ["#ffffff", "#ffe08a", "#8bc63f"],
     badge: "Premium Exotic",
+    ingredients: PARFAIT_INGREDIENTS,
+    benefits: PARFAIT_BENEFITS,
   },
   {
     id: "parfait-330",
@@ -60,6 +88,8 @@ export const products: Product[] = [
     image: "/products/parfait-330.png",
     colors: ["#ffffff", "#f0a8c0", "#6d4aa0"],
     badge: "Signature",
+    ingredients: PARFAIT_INGREDIENTS,
+    benefits: PARFAIT_BENEFITS,
   },
   {
     id: "parfait-250",
@@ -73,6 +103,8 @@ export const products: Product[] = [
     size: "250ml",
     image: "/products/parfait-250.png",
     colors: ["#ffffff", "#f7b8d4", "#e64b4b"],
+    ingredients: PARFAIT_INGREDIENTS,
+    benefits: PARFAIT_BENEFITS,
   },
 
   // ---------------- YOGHURT DRINKS (500ml · ₦3000 → ₦2500) ----------------
@@ -88,6 +120,7 @@ export const products: Product[] = [
     image: "/products/strawberry-yoghurt.png",
     colors: ["#ffd7e6", "#f06aa0", "#e64b4b"],
     badge: "Bestseller",
+    ...yoghurt("strawberries"),
   },
   {
     id: "banana-yoghurt",
@@ -100,6 +133,7 @@ export const products: Product[] = [
     size: "500ml",
     image: "/products/banana-yoghurt.png",
     colors: ["#fff4c2", "#ffe08a", "#e9c94a"],
+    ...yoghurt("banana"),
   },
   {
     id: "vanilla-yoghurt",
@@ -112,6 +146,7 @@ export const products: Product[] = [
     size: "500ml",
     image: "/products/vanilla-yoghurt.png",
     colors: ["#fffaf0", "#f6ecd6", "#e6d4a8"],
+    ...yoghurt("Madagascar vanilla"),
   },
   {
     id: "mango-yoghurt",
@@ -124,6 +159,7 @@ export const products: Product[] = [
     size: "500ml",
     image: "/products/mango-yoghurt.png",
     colors: ["#ffe9b0", "#ffc84a", "#ff9a2e"],
+    ...yoghurt("mango"),
   },
   {
     id: "blueberry-yoghurt",
@@ -136,6 +172,7 @@ export const products: Product[] = [
     size: "500ml",
     image: "/products/blueberry-yoghurt.png",
     colors: ["#dcd0f0", "#9a7ad0", "#6d4aa0"],
+    ...yoghurt("blueberries"),
   },
   {
     id: "kiwi-yoghurt",
@@ -148,6 +185,7 @@ export const products: Product[] = [
     size: "500ml",
     image: "/products/kiwi-yoghurt.png",
     colors: ["#e8f6d2", "#a8d85a", "#4e8a2b"],
+    ...yoghurt("kiwi"),
   },
 ];
 

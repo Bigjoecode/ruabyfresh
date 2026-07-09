@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useState } from "react";
 import { formatNaira, LAUNCH_OFFER, type Product } from "@/lib/products";
@@ -52,15 +53,17 @@ export default function ProductCard({ product }: { product: Product }) {
         style={{ background: product.colors[1] }}
       />
 
-      <div
+      <Link
+        href={`/product/${product.id}`}
+        aria-label={`View ${product.name}`}
         style={{ transform: "translateZ(45px)" }}
-        className="relative mx-auto h-52 w-full"
+        className="relative mx-auto block h-52 w-full"
       >
         <ProductImage
           product={product}
           className="h-full w-full transition-transform duration-500 group-hover:scale-105"
         />
-      </div>
+      </Link>
 
       <div className="mt-3" style={{ transform: "translateZ(25px)" }}>
         <div className="flex items-center justify-between gap-2">
@@ -72,9 +75,11 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         </div>
 
-        <h3 className="mt-3 font-display text-2xl font-semibold text-[var(--color-forest)]">
-          {product.name}
-        </h3>
+        <Link href={`/product/${product.id}`} className="mt-3 block">
+          <h3 className="font-display text-2xl font-semibold text-[var(--color-forest)] transition hover:text-[var(--color-rose)]">
+            {product.name}
+          </h3>
+        </Link>
         <p className="mt-1 min-h-[2.5rem] text-sm text-[var(--color-ink)]/60">
           {product.tagline}
         </p>
