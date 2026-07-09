@@ -194,6 +194,10 @@ export const categories = ["All", "Parfait", "Yoghurt"] as const;
 export const getProduct = (id: string) =>
   products.find((p) => p.id === id) ?? products[0];
 
+/** Product name for order lines — avoids duplicating the size (e.g. "500ml Parfait"). */
+export const displayName = (p: Product) =>
+  p.name.includes(p.size) ? p.name : `${p.name} · ${p.size}`;
+
 export function formatNaira(n: number) {
   return `${NAIRA}${n.toLocaleString("en-NG")}`;
 }

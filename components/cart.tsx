@@ -10,8 +10,14 @@ import {
   type ReactNode,
 } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { formatNaira, LAUNCH_OFFER, BRAND, type Product } from "@/lib/products";
-import { whatsappOrderLink, orderRef, type Customer } from "@/lib/order";
+import {
+  formatNaira,
+  displayName,
+  LAUNCH_OFFER,
+  BRAND,
+  type Product,
+} from "@/lib/products";
+import { submitOrder, orderRef, type Customer } from "@/lib/order";
 import ProductImage from "./ProductImage";
 import BankDetails from "./BankDetails";
 
@@ -110,14 +116,17 @@ function CartDrawer() {
   const [type, setType] = useState<"delivery" | "pickup">("delivery");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  const [payTouched, setPayTouched] = useState(false);
 
   // Always reopen at the basket step.
   useEffect(() => {
     if (!open) {
       setStep("cart");
       setTouched(false);
+      setPayTouched(false);
     }
   }, [open]);
 
@@ -133,24 +142,31 @@ function CartDrawer() {
 
   const onReceipt = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setReceipt(URL.createObjectURL(file));
+    if (file) {
+      setReceiptFile(file);
+      setReceipt(URL.createObjectURL(file));
+    }
   };
 
   const sendOrder = () => {
+    setPayTouched(true);
+    if (!receiptFile) return; // receipt is required
     const reference = orderRef();
     const customer: Customer = { name, phone, type, address, note };
-    const link = whatsappOrderLink({
-      reference,
-      total: subtotal,
-      bulk,
-      paid: true,
-      customer,
-      lines: lines.map((l) => ({
-        name: `${l.product.name} (${l.product.size})`,
-        qty: l.qty,
-        price: unitPrice(l.product, bulk),
-      })),
-    });
+    submitOrder(
+      {
+        reference,
+        total: subtotal,
+        bulk,
+        customer,
+        lines: lines.map((l) => ({
+          name: displayName(l.product),
+          qty: l.qty,
+          price: unitPrice(l.product, bulk),
+        })),
+      },
+      receiptFile
+    );
     fetch("/api/order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -166,7 +182,6 @@ function CartDrawer() {
         customer: { name, phone },
       }),
     }).catch(() => {});
-    window.open(link, "_blank", "noopener");
   };
 
   const field =
@@ -324,8 +339,16 @@ function CartDrawer() {
                   <BankDetails total={subtotal} />
 
                   <div>
-                    <span className="mb-1.5 block text-sm font-semibold text-[var(--color-forest)]">Upload payment receipt <span className="font-normal text-[var(--color-ink)]/40">(optional)</span></span>
-                    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--color-forest)]/30 bg-white/50 px-4 py-4 text-sm font-medium text-[var(--color-forest)] transition hover:bg-white/80">
+                    <span className="mb-1.5 block text-sm font-semibold text-[var(--color-forest)]">
+                      Upload payment receipt <span className="text-[var(--color-rose)]">*</span>
+                    </span>
+                    <label
+                      className={`flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-4 text-sm font-medium text-[var(--color-forest)] transition hover:bg-white/80 ${
+                        payTouched && !receiptFile
+                          ? "border-[var(--color-strawberry)]/70 bg-[var(--color-strawberry)]/5"
+                          : "border-[var(--color-forest)]/30 bg-white/50"
+                      }`}
+                    >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></svg>
                       {receipt ? "Change receipt" : "Choose screenshot"}
                       <input type="file" accept="image/*" className="hidden" onChange={onReceipt} />
@@ -334,11 +357,16 @@ function CartDrawer() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={receipt} alt="Payment receipt preview" className="mt-3 max-h-40 w-full rounded-xl object-contain ring-1 ring-[var(--color-forest)]/10" />
                     )}
+                    {payTouched && !receiptFile && (
+                      <p className="mt-2 text-sm text-[var(--color-strawberry)]" role="alert">
+                        Please upload your transfer receipt to continue.
+                      </p>
+                    )}
                   </div>
 
                   <p className="rounded-xl bg-[var(--color-leaf-soft)]/40 px-4 py-3 text-xs leading-relaxed text-[var(--color-forest)]">
-                    After transferring, tap the button below — WhatsApp opens with your
-                    order ready to send. Please attach your receipt screenshot in that chat.
+                    After transferring, upload your receipt and tap below. On your phone,
+                    WhatsApp opens with the receipt <b>and</b> order attached — just hit send.
                   </p>
                 </div>
               )}

@@ -4,11 +4,12 @@ import { useState } from "react";
 import {
   products,
   formatNaira,
+  displayName,
   LAUNCH_OFFER,
   BRAND,
   type Product,
 } from "@/lib/products";
-import { whatsappOrderLink, orderRef } from "@/lib/order";
+import { submitOrder, orderRef } from "@/lib/order";
 import BankDetails from "./BankDetails";
 
 /**
@@ -30,23 +31,37 @@ export default function PreorderForm({
   const [type, setType] = useState<"delivery" | "pickup">("delivery");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
 
   const chosen = product ?? products.find((p) => p.id === selectedId)!;
   const unit = LAUNCH_OFFER ? chosen.launchPrice : chosen.price;
   const total = unit * qty;
-  const valid = name.trim() && phone.trim() && (type === "pickup" || address.trim());
+  const valid =
+    name.trim() && phone.trim() && (type === "pickup" || address.trim()) && receiptFile;
+
+  const onReceipt = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReceiptFile(file);
+      setReceipt(URL.createObjectURL(file));
+    }
+  };
 
   const submit = () => {
     setTouched(true);
-    if (!valid) return;
+    if (!valid || !receiptFile) return;
     const reference = orderRef();
-    const link = whatsappOrderLink({
-      reference,
-      total,
-      lines: [{ name: `${chosen.name} (${chosen.size})`, qty, price: unit }],
-      customer: { name, phone, type, address, note },
-    });
+    submitOrder(
+      {
+        reference,
+        total,
+        lines: [{ name: displayName(chosen), qty, price: unit }],
+        customer: { name, phone, type, address, note },
+      },
+      receiptFile
+    );
     // Fire-and-forget record for the team's logs.
     fetch("/api/order", {
       method: "POST",
@@ -58,7 +73,6 @@ export default function PreorderForm({
         customer: { name, phone },
       }),
     }).catch(() => {});
-    window.open(link, "_blank", "noopener");
   };
 
   const field =
@@ -208,6 +222,27 @@ export default function PreorderForm({
         <BankDetails total={total} />
       </div>
 
+      <div className="mt-4">
+        <span className="mb-1.5 block text-sm font-semibold text-[var(--color-forest)]">
+          Upload payment receipt <span className="text-[var(--color-rose)]">*</span>
+        </span>
+        <label
+          className={`flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-4 text-sm font-medium text-[var(--color-forest)] transition hover:bg-white/80 ${
+            touched && !receiptFile
+              ? "border-[var(--color-strawberry)]/70 bg-[var(--color-strawberry)]/5"
+              : "border-[var(--color-forest)]/30 bg-white/50"
+          }`}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 16V4m0 0 4 4m-4-4L8 8M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></svg>
+          {receipt ? "Change receipt" : "Choose screenshot"}
+          <input type="file" accept="image/*" className="hidden" onChange={onReceipt} />
+        </label>
+        {receipt && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={receipt} alt="Payment receipt preview" className="mt-3 max-h-40 w-full rounded-xl object-contain ring-1 ring-[var(--color-forest)]/10" />
+        )}
+      </div>
+
       <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
         <div className="text-center sm:text-left">
           <p className="text-sm text-[var(--color-forest)]/60">Order total</p>
@@ -225,11 +260,13 @@ export default function PreorderForm({
       </div>
       {touched && !valid && (
         <p className="mt-3 text-center text-sm text-[var(--color-strawberry)]" role="alert">
-          Please add your name, phone{type === "delivery" ? " and delivery address" : ""}.
+          {!name.trim() || !phone.trim() || (type === "delivery" && !address.trim())
+            ? `Please add your name, phone${type === "delivery" ? " and delivery address" : ""}.`
+            : "Please upload your transfer receipt."}
         </p>
       )}
       <p className="mt-3 text-center text-xs text-[var(--color-forest)]/50">
-        You&apos;ll send the order to {BRAND.whatsappDisplay} and attach your transfer receipt.
+        On your phone, WhatsApp opens to {BRAND.whatsappDisplay} with your receipt and order attached.
       </p>
     </div>
   );
