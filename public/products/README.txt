@@ -18,9 +18,6 @@ YOGHURT DRINKS (500ml bottles)
   strawberry-yoghurt.png
   banana-yoghurt.png
   vanilla-yoghurt.png
-  mango-yoghurt.png
-  blueberry-yoghurt.png
-  kiwi-yoghurt.png
 
 HERO BACKGROUND (optional — used behind the dripping hero)
   hero-parfait.png    ← a big beautiful parfait shot

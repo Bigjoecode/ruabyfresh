@@ -9,10 +9,8 @@ const words = [
   "No Preservatives",
   "Granola",
   "Fresh Daily",
-  "Blueberry",
   "Handcrafted",
-  "Mango",
-  "Kiwi",
+  "Fresh Vibes Only",
 ];
 
 export default function Marquee() {

@@ -30,7 +30,7 @@ Typography: **Fraunces** (display serif) + **Jost** (sans).
 ## 🍨 Products
 
 - **Parfaits** — 250ml, 330ml, 500ml (15% launch offer)
-- **Yoghurt Drinks** — 500ml bottles: Strawberry, Banana, Vanilla, Mango, Blueberry, Kiwi (₦3,000 → ₦2,500)
+- **Yoghurt Drinks** — 500ml bottles: Strawberry, Banana, Vanilla (₦3,000 → ₦2,500)
 
 Edit everything (prices, flavours, ingredients, bank details, socials) in
 [`lib/products.ts`](lib/products.ts).

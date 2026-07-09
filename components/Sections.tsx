@@ -80,8 +80,7 @@ export function WhyChoose() {
 export function Gallery() {
   const tiles = [
     "parfait-330", "strawberry-yoghurt", "parfait-500",
-    "mango-yoghurt", "banana-yoghurt", "parfait-250",
-    "vanilla-yoghurt", "blueberry-yoghurt",
+    "banana-yoghurt", "parfait-250", "vanilla-yoghurt",
   ].map(getProduct);
   return (
     <section id="gallery" className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
@@ -227,7 +226,7 @@ export function LaunchOffer() {
             </p>
             <p className="mt-2 font-display text-2xl font-semibold">Every flavour</p>
             <p className="mt-2 max-w-xs text-white/75">
-              Strawberry, Banana, Vanilla, Mango, Blueberry & Kiwi — rich, creamy
+              Strawberry, Banana & Vanilla — rich, creamy
               & made fresh daily.
             </p>
             <a
