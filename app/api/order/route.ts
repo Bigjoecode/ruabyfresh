@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { supabaseAdminConfigured } from "@/lib/supabase/config";
+import { sendOrderEmail } from "@/lib/email";
 
 /**
  * Records a booking. Accepts multipart form-data:
@@ -48,8 +49,9 @@ export async function POST(req: Request) {
 
     const sb = createAdminClient();
 
-    // Upload receipt screenshot (if provided).
-    let receiptUrl: string | null = null;
+    // Upload receipt screenshot to the private bucket; store the PATH (a signed
+    // URL is generated on demand in the admin, so receipts stay private).
+    let receiptPath: string | null = null;
     if (receipt && typeof receipt !== "string" && receipt.size > 0) {
       const ext = (receipt.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
       const path = `${reference}-${Date.now()}.${ext || "png"}`;
@@ -57,25 +59,38 @@ export async function POST(req: Request) {
       const { error: upErr } = await sb.storage
         .from("receipts")
         .upload(path, bytes, { contentType: receipt.type || "image/png", upsert: true });
-      if (!upErr) {
-        receiptUrl = sb.storage.from("receipts").getPublicUrl(path).data.publicUrl;
-      }
+      if (!upErr) receiptPath = path;
     }
 
-    const { error } = await sb.from("orders").insert({
-      reference,
-      customer_name: payload.customer?.name ?? null,
-      customer_phone: payload.customer?.phone ?? null,
-      fulfilment: payload.customer?.type ?? null,
-      address: payload.customer?.address ?? null,
-      note: payload.customer?.note ?? null,
-      items: payload.lines,
-      total: payload.total,
-      bulk: !!payload.bulk,
-      receipt_url: receiptUrl,
-      status: "new",
-    });
+    const { data: inserted, error } = await sb
+      .from("orders")
+      .insert({
+        reference,
+        customer_name: payload.customer?.name ?? null,
+        customer_phone: payload.customer?.phone ?? null,
+        fulfilment: payload.customer?.type ?? null,
+        address: payload.customer?.address ?? null,
+        note: payload.customer?.note ?? null,
+        items: payload.lines,
+        total: payload.total,
+        bulk: !!payload.bulk,
+        receipt_url: receiptPath,
+        status: "new",
+      })
+      .select("id")
+      .single();
     if (error) throw error;
+
+    // Best-effort admin email (no-op unless RESEND_API_KEY is set).
+    await sendOrderEmail({
+      id: inserted?.id,
+      reference,
+      total: payload.total,
+      bulk: payload.bulk,
+      customer: payload.customer,
+      lines: payload.lines,
+      hasReceipt: !!receiptPath,
+    });
 
     return NextResponse.json({ ok: true, reference, stored: true });
   } catch (e) {

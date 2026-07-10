@@ -20,6 +20,19 @@ export async function getOrder(id: string): Promise<Order | null> {
   return (data as Order) ?? null;
 }
 
+/**
+ * Resolves a receipt reference to a viewable URL. New orders store a storage
+ * path in a PRIVATE bucket → a short-lived signed URL is generated. Legacy
+ * orders that stored a full public URL are returned as-is.
+ */
+export async function signedReceiptUrl(value: string | null): Promise<string | null> {
+  if (!value) return null;
+  if (value.startsWith("http")) return value;
+  const sb = createAdminClient();
+  const { data } = await sb.storage.from("receipts").createSignedUrl(value, 60 * 60);
+  return data?.signedUrl ?? null;
+}
+
 export async function getAdminProducts(): Promise<Product[]> {
   const sb = createAdminClient();
   const { data } = await sb

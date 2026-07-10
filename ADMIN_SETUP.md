@@ -49,10 +49,29 @@ ADMIN_EMAILS                  = your@email.com
 - **Bookings →** every order appears here with its **payment receipt**; change
   status (new → confirmed → delivered) and message the customer on WhatsApp.
 
+## 7. Make receipts private (recommended)
+Receipts are now viewed through short-lived **signed URLs** in the admin. If you
+ran the original `schema.sql` (which created a public `receipts` bucket), run
+[`supabase/make-receipts-private.sql`](supabase/make-receipts-private.sql) once
+in the SQL Editor to lock the bucket down. New Supabase projects get this
+automatically from the updated schema.
+
+## 8. Email on every new order (optional)
+Get an instant email whenever a booking comes in:
+1. Sign up free at **resend.com** → **API Keys → Create**.
+2. (Optional but recommended) verify your domain under **Domains** so emails can
+   come from e.g. `orders@ruabyfresh.com`. For testing you can skip this and use
+   the default `onboarding@resend.dev` (it only delivers to your own Resend
+   account email).
+3. Add to Vercel env vars + redeploy:
+   ```
+   RESEND_API_KEY = re_xxx
+   RESEND_FROM    = Ruaby Fresh <orders@yourdomain.com>   # or onboarding@resend.dev
+   ```
+Emails go to everyone in `ADMIN_EMAILS`. If `RESEND_API_KEY` is empty, this is
+simply skipped — orders still save and open WhatsApp.
+
 ### Notes
 - The public storefront updates within ~30 seconds of an admin change.
-- Receipts live in the public `receipts` bucket under random filenames. For
-  extra privacy you can later make that bucket private and switch to signed
-  URLs — say the word and I'll wire it.
 - `ADMIN_EMAILS` limits who can enter the admin even if they have a Supabase
   login. Leave it blank to allow any user you create in Supabase.

@@ -78,15 +78,18 @@ create policy "admin read orders" on public.orders for select using (auth.role()
 drop policy if exists "admin update orders" on public.orders;
 create policy "admin update orders" on public.orders for update using (auth.role() = 'authenticated');
 
--- ---------- Storage buckets (public; files use unguessable names) ----------
-insert into storage.buckets (id, name, public) values ('receipts', 'receipts', true) on conflict (id) do nothing;
+-- ---------- Storage buckets ----------
+-- receipts are PRIVATE (viewed via short-lived signed URLs in the admin).
+insert into storage.buckets (id, name, public) values ('receipts', 'receipts', false) on conflict (id) do update set public = false;
+-- product/hero images are public (shown on the storefront).
 insert into storage.buckets (id, name, public) values ('product-images', 'product-images', true) on conflict (id) do nothing;
 insert into storage.buckets (id, name, public) values ('hero-images', 'hero-images', true) on conflict (id) do nothing;
 
--- Allow public read of the buckets; writes go through the service-role key.
+-- Public read of the image buckets only; receipts + all writes use the
+-- service-role key (which bypasses these policies).
 drop policy if exists "public read buckets" on storage.objects;
 create policy "public read buckets" on storage.objects for select
-  using (bucket_id in ('receipts','product-images','hero-images'));
+  using (bucket_id in ('product-images','hero-images'));
 
 -- Done. Now create your admin login: Authentication → Users → Add user
 -- (email + password), and add the env vars from .env.example to Vercel.

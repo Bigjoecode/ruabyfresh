@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getOrder } from "@/lib/admin-data";
+import { getOrder, signedReceiptUrl } from "@/lib/admin-data";
 import { formatNaira } from "@/lib/products";
 import StatusChanger from "@/components/admin/StatusChanger";
 
@@ -14,6 +14,8 @@ export default async function OrderDetail({
   const { id } = await params;
   const order = await getOrder(id);
   if (!order) notFound();
+
+  const receiptUrl = await signedReceiptUrl(order.receipt_url);
 
   const rows: { k: string; v: string }[] = [
     { k: "Reference", v: order.reference },
@@ -110,11 +112,11 @@ export default async function OrderDetail({
             <h2 className="mb-3 font-display text-lg font-semibold text-[var(--color-forest)]">
               Payment receipt
             </h2>
-            {order.receipt_url ? (
-              <a href={order.receipt_url} target="_blank" rel="noopener noreferrer">
+            {receiptUrl ? (
+              <a href={receiptUrl} target="_blank" rel="noopener noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={order.receipt_url}
+                  src={receiptUrl}
                   alt="Payment receipt"
                   className="w-full rounded-xl ring-1 ring-[var(--color-forest)]/10 transition hover:opacity-90"
                 />
