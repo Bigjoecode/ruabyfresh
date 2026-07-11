@@ -27,9 +27,11 @@ export type EmailStatus =
  * "skipped" / "failed"); detailed errors are logged to the server only (so no
  * sensitive addresses leak through the public API response).
  */
-export async function sendOrderEmail(order: OrderEmail): Promise<EmailStatus> {
-  if (!KEY) return "skipped-no-key";
-  if (ADMIN_EMAILS.length === 0) return "skipped-no-recipient";
+export async function sendOrderEmail(
+  order: OrderEmail
+): Promise<{ status: EmailStatus; detail?: string }> {
+  if (!KEY) return { status: "skipped-no-key" };
+  if (ADMIN_EMAILS.length === 0) return { status: "skipped-no-recipient" };
 
   const c = order.customer ?? {};
   const items = order.lines
@@ -75,11 +77,12 @@ export async function sendOrderEmail(order: OrderEmail): Promise<EmailStatus> {
         html,
       }),
     });
-    if (res.ok) return "sent";
-    console.error("[ruaby-email] Resend", res.status, await res.text().catch(() => ""));
-    return "failed";
+    if (res.ok) return { status: "sent" };
+    const body = await res.text().catch(() => "");
+    console.error("[ruaby-email] Resend", res.status, body);
+    return { status: "failed", detail: `Resend ${res.status}: ${body.slice(0, 300)}` };
   } catch (e) {
     console.error("[ruaby-email]", e);
-    return "failed";
+    return { status: "failed", detail: String(e).slice(0, 300) };
   }
 }
