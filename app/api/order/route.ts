@@ -82,7 +82,7 @@ export async function POST(req: Request) {
     if (error) throw error;
 
     // Best-effort admin email (no-op unless RESEND_API_KEY is set).
-    await sendOrderEmail({
+    const emailed = await sendOrderEmail({
       id: inserted?.id,
       reference,
       total: payload.total,
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       hasReceipt: !!receiptPath,
     });
 
-    return NextResponse.json({ ok: true, reference, stored: true });
+    return NextResponse.json({ ok: true, reference, stored: true, emailed });
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: "Could not record order", detail: String(e) },

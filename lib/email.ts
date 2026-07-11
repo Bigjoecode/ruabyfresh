@@ -15,12 +15,16 @@ type OrderEmail = {
   hasReceipt?: boolean;
 };
 
+export type EmailStatus = "sent" | "skipped" | "failed";
+
 /**
  * Emails the admin(s) about a new order via Resend. No-op unless RESEND_API_KEY
- * and ADMIN_EMAILS are set, and never throws (callers ignore failures).
+ * and ADMIN_EMAILS are set. Never throws — returns a coarse status ("sent" /
+ * "skipped" / "failed"); detailed errors are logged to the server only (so no
+ * sensitive addresses leak through the public API response).
  */
-export async function sendOrderEmail(order: OrderEmail) {
-  if (!KEY || ADMIN_EMAILS.length === 0) return;
+export async function sendOrderEmail(order: OrderEmail): Promise<EmailStatus> {
+  if (!KEY || ADMIN_EMAILS.length === 0) return "skipped";
 
   const c = order.customer ?? {};
   const items = order.lines
@@ -56,7 +60,7 @@ export async function sendOrderEmail(order: OrderEmail) {
   </div>`;
 
   try {
-    await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -66,7 +70,11 @@ export async function sendOrderEmail(order: OrderEmail) {
         html,
       }),
     });
-  } catch {
-    // best-effort; never block the order
+    if (res.ok) return "sent";
+    console.error("[ruaby-email] Resend", res.status, await res.text().catch(() => ""));
+    return "failed";
+  } catch (e) {
+    console.error("[ruaby-email]", e);
+    return "failed";
   }
 }
