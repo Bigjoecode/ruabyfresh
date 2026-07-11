@@ -15,7 +15,11 @@ type OrderEmail = {
   hasReceipt?: boolean;
 };
 
-export type EmailStatus = "sent" | "skipped" | "failed";
+export type EmailStatus =
+  | "sent"
+  | "skipped-no-key"
+  | "skipped-no-recipient"
+  | "failed";
 
 /**
  * Emails the admin(s) about a new order via Resend. No-op unless RESEND_API_KEY
@@ -24,7 +28,8 @@ export type EmailStatus = "sent" | "skipped" | "failed";
  * sensitive addresses leak through the public API response).
  */
 export async function sendOrderEmail(order: OrderEmail): Promise<EmailStatus> {
-  if (!KEY || ADMIN_EMAILS.length === 0) return "skipped";
+  if (!KEY) return "skipped-no-key";
+  if (ADMIN_EMAILS.length === 0) return "skipped-no-recipient";
 
   const c = order.customer ?? {};
   const items = order.lines
