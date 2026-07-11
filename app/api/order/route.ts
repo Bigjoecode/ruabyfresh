@@ -92,14 +92,11 @@ export async function POST(req: Request) {
       hasReceipt: !!receiptPath,
     });
 
-    // Detailed email error only when explicitly requested (never public).
-    const debug = req.headers.get("x-ruaby-debug") === "1";
     return NextResponse.json({
       ok: true,
       reference,
       stored: true,
       emailed: emailed.status,
-      ...(debug && emailed.detail ? { emailDetail: emailed.detail } : {}),
     });
   } catch (e) {
     return NextResponse.json(
