@@ -68,8 +68,36 @@ Get an instant email whenever a booking comes in:
    RESEND_API_KEY = re_xxx
    RESEND_FROM    = Ruaby Fresh <orders@yourdomain.com>   # or onboarding@resend.dev
    ```
-Emails go to everyone in `ADMIN_EMAILS`. If `RESEND_API_KEY` is empty, this is
-simply skipped — orders still save and open WhatsApp.
+Emails go to everyone in `ORDER_NOTIFY_EMAILS` (or `ADMIN_EMAILS` if that's
+unset). If `RESEND_API_KEY` is empty, this is simply skipped — orders still save
+and open WhatsApp.
+
+**Important — the testing restriction:** with the default
+`onboarding@resend.dev` sender, Resend will ONLY deliver to *your Resend account
+email*. So either:
+- set `ORDER_NOTIFY_EMAILS` to that Resend account email (quick), **or**
+- verify a domain at **resend.com/domains** and set `RESEND_FROM` to an address
+  on it (e.g. `orders@ruabyfresh.com`) — then you can email any address.
+
+## 9. WhatsApp auto-reply to customers
+Customers send their order to your official line **+234 703 689 2225**. To auto-reply:
+
+**Free & instant — WhatsApp Business App (recommended):** install/switch that
+number to the free **WhatsApp Business** app, then set
+**Settings → Business tools → Greeting message** (auto-sent the first time a
+customer messages) and/or **Away message** (outside business hours). Example:
+> "Thanks for ordering from Ruaby Fresh 💚 We've received your order and will
+> confirm shortly. Fresh Vibes Only!"
+
+Because the customer messages you first, this fires automatically — no code needed.
+
+**Per-order confirmation:** in **Admin → Bookings → (an order)**, tap
+**"Confirm on WhatsApp"** — it opens a chat to that customer pre-filled with a
+personalised confirmation (their name + order reference).
+
+**Fully automated, system-sent messages** (no app, no tap) need the WhatsApp
+Business *Cloud API* (Meta/Twilio) — bigger setup and it takes the number off the
+normal app. Ask me if you want to go that route.
 
 ### Notes
 - The public storefront updates within ~30 seconds of an admin change.

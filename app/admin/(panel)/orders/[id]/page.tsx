@@ -17,6 +17,17 @@ export default async function OrderDetail({
 
   const receiptUrl = await signedReceiptUrl(order.receipt_url);
 
+  // One-tap confirmation reply to the customer, pre-filled on WhatsApp.
+  const customerWa = order.customer_phone
+    ? order.customer_phone.replace(/[^0-9]/g, "").replace(/^0/, "234")
+    : "";
+  const confirmMsg = encodeURIComponent(
+    `Hi ${order.customer_name || "there"}, thank you for your Ruaby Fresh order ${order.reference}! ` +
+      `We've received your payment and your order is confirmed. ` +
+      `${order.fulfilment === "delivery" ? "We'll be in touch about delivery" : "It'll be ready for pickup"} shortly. ` +
+      `Fresh Vibes Only 💚`
+  );
+
   const rows: { k: string; v: string }[] = [
     { k: "Reference", v: order.reference },
     { k: "Placed", v: new Date(order.created_at).toLocaleString("en-NG") },
@@ -45,13 +56,13 @@ export default async function OrderDetail({
         </h1>
         {order.customer_phone && (
           <a
-            href={`https://wa.me/${order.customer_phone.replace(/[^0-9]/g, "").replace(/^0/, "234")}`}
+            href={`https://wa.me/${customerWa}?text=${confirmMsg}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-[var(--color-forest)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-forest-deep)]"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Z" /></svg>
-            Message customer
+            Confirm on WhatsApp
           </a>
         )}
       </div>

@@ -16,3 +16,13 @@ export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
 
 export const isAdminEmail = (email?: string | null) =>
   !!email && (ADMIN_EMAILS.length === 0 || ADMIN_EMAILS.includes(email.toLowerCase()));
+
+/**
+ * Where new-order emails are sent. Defaults to ADMIN_EMAILS, but can be set
+ * separately (e.g. to your Resend account email while testing without a
+ * verified domain) without changing who can log into the admin.
+ */
+export const ORDER_NOTIFY_EMAILS = (process.env.ORDER_NOTIFY_EMAILS || process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);

@@ -1,4 +1,4 @@
-import { ADMIN_EMAILS } from "./supabase/config";
+import { ORDER_NOTIFY_EMAILS } from "./supabase/config";
 import { formatNaira } from "./products";
 
 const KEY = process.env.RESEND_API_KEY || "";
@@ -23,7 +23,7 @@ export type EmailStatus =
 
 /**
  * Emails the admin(s) about a new order via Resend. No-op unless RESEND_API_KEY
- * and ADMIN_EMAILS are set. Never throws — returns a coarse status ("sent" /
+ * and ORDER_NOTIFY_EMAILS are set. Never throws — returns a coarse status ("sent" /
  * "skipped" / "failed"); detailed errors are logged to the server only (so no
  * sensitive addresses leak through the public API response).
  */
@@ -31,7 +31,7 @@ export async function sendOrderEmail(
   order: OrderEmail
 ): Promise<{ status: EmailStatus; detail?: string }> {
   if (!KEY) return { status: "skipped-no-key" };
-  if (ADMIN_EMAILS.length === 0) return { status: "skipped-no-recipient" };
+  if (ORDER_NOTIFY_EMAILS.length === 0) return { status: "skipped-no-recipient" };
 
   const c = order.customer ?? {};
   const items = order.lines
@@ -72,7 +72,7 @@ export async function sendOrderEmail(
       headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: FROM,
-        to: ADMIN_EMAILS,
+        to: ORDER_NOTIFY_EMAILS,
         subject: `New order ${order.reference} · ${formatNaira(order.total)}`,
         html,
       }),
