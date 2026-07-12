@@ -92,13 +92,11 @@ export async function POST(req: Request) {
       hasReceipt: !!receiptPath,
     });
 
-    const debug = req.headers.get("x-ruaby-debug") === "1";
     return NextResponse.json({
       ok: true,
       reference,
       stored: true,
       emailed: emailed.status,
-      ...(debug && emailed.detail ? { emailDetail: emailed.detail } : {}),
     });
   } catch (e) {
     return NextResponse.json(
