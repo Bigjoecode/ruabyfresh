@@ -452,9 +452,19 @@ function CartDrawer() {
               </div>
 
               {step === "cart" && (
-                <button onClick={goToDetails} disabled={lines.length === 0} className="w-full cursor-pointer rounded-full bg-[var(--color-forest)] py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)] disabled:cursor-not-allowed disabled:opacity-40">
-                  Continue to details
-                </button>
+                <>
+                  <button onClick={goToDetails} disabled={lines.length === 0} className="w-full cursor-pointer rounded-full bg-[var(--color-forest)] py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)] disabled:cursor-not-allowed disabled:opacity-40">
+                    Continue to details
+                  </button>
+                  <a
+                    href="/#menu"
+                    onClick={() => setOpen(false)}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-full py-3 font-medium text-[var(--color-forest)]/75 transition hover:text-[var(--color-forest)]"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                    Add more items
+                  </a>
+                </>
               )}
               {step === "details" && (
                 <button onClick={goToPay} className="w-full cursor-pointer rounded-full bg-[var(--color-forest)] py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)]">

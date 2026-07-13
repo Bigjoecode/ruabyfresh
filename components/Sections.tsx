@@ -385,10 +385,10 @@ export function Footer() {
                 Menu
               </p>
               <ul className="space-y-2 text-sm text-[var(--color-ink)]/70">
-                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Parfaits</a></li>
-                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Yoghurt Drinks</a></li>
-                <li><a href="#menu" className="hover:text-[var(--color-rose)]">Launch Offer</a></li>
-                <li><a href="#top" className="hover:text-[var(--color-rose)]">Pre-order</a></li>
+                <li><a href="/#menu" className="hover:text-[var(--color-rose)]">Parfaits</a></li>
+                <li><a href="/#menu" className="hover:text-[var(--color-rose)]">Yoghurt Drinks</a></li>
+                <li><a href="/#offer" className="hover:text-[var(--color-rose)]">Launch Offer</a></li>
+                <li><a href="/#preorder" className="hover:text-[var(--color-rose)]">Pre-order</a></li>
               </ul>
             </div>
             <div>
@@ -396,10 +396,10 @@ export function Footer() {
                 Company
               </p>
               <ul className="space-y-2 text-sm text-[var(--color-ink)]/70">
-                <li><a href="#why" className="hover:text-[var(--color-rose)]">Why Us</a></li>
-                <li><a href="#gallery" className="hover:text-[var(--color-rose)]">Gallery</a></li>
-                <li><a href="#reviews" className="hover:text-[var(--color-rose)]">Reviews</a></li>
-                <li><a href="#top" className="hover:text-[var(--color-rose)]">Bulk Orders</a></li>
+                <li><a href="/#why" className="hover:text-[var(--color-rose)]">Why Us</a></li>
+                <li><a href="/#gallery" className="hover:text-[var(--color-rose)]">Gallery</a></li>
+                <li><a href="/#reviews" className="hover:text-[var(--color-rose)]">Reviews</a></li>
+                <li><a href="/policies" className="hover:text-[var(--color-rose)]">Policies</a></li>
               </ul>
             </div>
           </div>
@@ -407,7 +407,13 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[var(--color-forest)]/10 pt-6 text-xs text-[var(--color-ink)]/50 md:flex-row">
           <p>© {new Date().getFullYear()} Ruaby Fresh. All rights reserved.</p>
-          <p>Pay by bank transfer · Made with 💚 in Asaba</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <a href="/policies#refund" className="hover:text-[var(--color-rose)]">Refund</a>
+            <a href="/policies#delivery" className="hover:text-[var(--color-rose)]">Delivery</a>
+            <a href="/policies#terms" className="hover:text-[var(--color-rose)]">Terms</a>
+            <a href="/policies#privacy" className="hover:text-[var(--color-rose)]">Privacy</a>
+            <span>Pay by bank transfer</span>
+          </div>
         </div>
       </div>
     </footer>
