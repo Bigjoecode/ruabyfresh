@@ -18,7 +18,14 @@ import {
   BRAND,
   type Product,
 } from "@/lib/products";
-import { submitOrder, storeOrder, orderRef, type Customer } from "@/lib/order";
+import {
+  submitOrder,
+  storeOrder,
+  orderRef,
+  buildOrderMessage,
+  whatsappUrl,
+  type Customer,
+} from "@/lib/order";
 import ProductImage from "./ProductImage";
 import BankDetails from "./BankDetails";
 
@@ -36,6 +43,7 @@ type CartCtx = {
   add: (p: Product, qty?: number) => void;
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
+  clear: () => void;
   setOpen: (o: boolean) => void;
 };
 
@@ -79,6 +87,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const clear = useCallback(() => setLines([]), []);
+
   const count = useMemo(() => lines.reduce((s, l) => s + l.qty, 0), [lines]);
   const bulk = count >= BULK_THRESHOLD;
   const subtotal = useMemo(
@@ -95,6 +105,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     add,
     remove,
     setQty,
+    clear,
     setOpen,
   };
 
@@ -106,10 +117,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 }
 
-type Step = "cart" | "details" | "pay";
+type Step = "cart" | "details" | "pay" | "done";
 
 function CartDrawer() {
-  const { lines, open, setOpen, subtotal, count, bulk, setQty } = useCart();
+  const { lines, open, setOpen, subtotal, count, bulk, setQty, clear } = useCart();
 
   const [step, setStep] = useState<Step>("cart");
   const [name, setName] = useState("");
@@ -121,6 +132,12 @@ function CartDrawer() {
   const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
   const [payTouched, setPayTouched] = useState(false);
+  const [confirmed, setConfirmed] = useState<{
+    reference: string;
+    phone: string;
+    type: string;
+    waUrl: string;
+  } | null>(null);
 
   // Always reopen at the basket step.
   useEffect(() => {
@@ -169,7 +186,12 @@ function CartDrawer() {
     // addressed to the official Ruaby line.
     storeOrder(order, receiptFile).catch(() => {});
     submitOrder(order);
-    setOpen(false);
+    // Show the on-screen confirmation and empty the basket.
+    setConfirmed({ reference, phone, type, waUrl: whatsappUrl(buildOrderMessage(order)) });
+    setStep("done");
+    clear();
+    setReceiptFile(null);
+    setReceipt(null);
   };
 
   const field =
@@ -181,6 +203,7 @@ function CartDrawer() {
     cart: { title: "Your basket", sub: `${count} item${count !== 1 ? "s" : ""}${bulk && anyBulk ? " · bulk unlocked" : ""}` },
     details: { title: "Your details", sub: "Where should it go?" },
     pay: { title: "Pay & confirm", sub: "Transfer, then send on WhatsApp" },
+    done: { title: "Order received", sub: "One last step in WhatsApp" },
   };
 
   return (
@@ -204,7 +227,7 @@ function CartDrawer() {
           >
             <header className="flex items-center justify-between px-6 pt-6 pb-4">
               <div className="flex items-center gap-2">
-                {step !== "cart" && (
+                {step !== "cart" && step !== "done" && (
                   <button
                     aria-label="Back"
                     onClick={() => setStep(step === "pay" ? "details" : "cart")}
@@ -230,18 +253,20 @@ function CartDrawer() {
             </header>
 
             {/* step progress */}
-            <div className="flex gap-1.5 px-6 pb-3">
-              {(["cart", "details", "pay"] as Step[]).map((s, i) => (
-                <span
-                  key={s}
-                  className={`h-1 flex-1 rounded-full transition ${
-                    ["cart", "details", "pay"].indexOf(step) >= i
-                      ? "bg-[var(--color-leaf)]"
-                      : "bg-[var(--color-forest)]/15"
-                  }`}
-                />
-              ))}
-            </div>
+            {step !== "done" && (
+              <div className="flex gap-1.5 px-6 pb-3">
+                {(["cart", "details", "pay"] as Step[]).map((s, i) => (
+                  <span
+                    key={s}
+                    className={`h-1 flex-1 rounded-full transition ${
+                      ["cart", "details", "pay"].indexOf(step) >= i
+                        ? "bg-[var(--color-leaf)]"
+                        : "bg-[var(--color-forest)]/15"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="flex-1 space-y-3 overflow-y-auto px-6 py-2">
               {/* ---------- CART STEP ---------- */}
@@ -361,9 +386,66 @@ function CartDrawer() {
                   </p>
                 </div>
               )}
+
+              {/* ---------- DONE STEP ---------- */}
+              {step === "done" && confirmed && (
+                <div className="flex flex-col items-center py-8 text-center">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 16 }}
+                    className="grid h-20 w-20 place-items-center rounded-full bg-[var(--color-leaf)]/25 text-[var(--color-forest)]"
+                  >
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                  </motion.div>
+
+                  <p className="mt-5 font-display text-3xl font-semibold text-[var(--color-forest)]">
+                    Order received!
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--color-forest)]/70">
+                    Reference{" "}
+                    <span className="font-semibold text-[var(--color-rose)]">{confirmed.reference}</span>
+                  </p>
+
+                  <div className="mt-6 w-full rounded-2xl bg-[var(--color-leaf-soft)]/40 p-4 text-left">
+                    <p className="font-semibold text-[var(--color-forest)]">One last step</p>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--color-forest)]/85">
+                      We&apos;ve opened WhatsApp to Ruaby Fresh. Tap <b>send</b> to confirm your
+                      order, and attach your payment receipt in the chat.
+                    </p>
+                  </div>
+
+                  <p className="mt-4 text-sm text-[var(--color-ink)]/60">
+                    {confirmed.type === "delivery"
+                      ? "We'll be in touch about your delivery"
+                      : "We'll have it ready for pickup"}
+                    {confirmed.phone ? ` — we may call you on ${confirmed.phone}.` : "."}
+                  </p>
+                </div>
+              )}
             </div>
 
             <footer className="space-y-3 px-6 pb-6 pt-3">
+              {step === "done" ? (
+                <>
+                  <a
+                    href={confirmed?.waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--color-forest)] py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)]"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
+                    Open WhatsApp to send
+                  </a>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="w-full cursor-pointer rounded-full py-3 font-medium text-[var(--color-forest)]/70 transition hover:text-[var(--color-forest)]"
+                  >
+                    Done
+                  </button>
+                </>
+              ) : (
+              <>
               <div className="flex items-center justify-between">
                 <span className="text-[var(--color-forest)]/70">{step === "pay" ? "Total to pay" : "Subtotal"}</span>
                 <span className="font-display text-2xl font-semibold text-[var(--color-forest)]">{formatNaira(subtotal)}</span>
@@ -388,6 +470,8 @@ function CartDrawer() {
               <p className="text-center text-xs text-[var(--color-forest)]/50">
                 Bank transfer · {BRAND.bank.name} · Single &amp; bulk · {BRAND.city}
               </p>
+              </>
+              )}
             </footer>
           </motion.aside>
         </>

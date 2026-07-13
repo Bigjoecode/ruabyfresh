@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "motion/react";
 import {
   products as seedProducts,
   formatNaira,
@@ -9,7 +10,13 @@ import {
   BRAND,
   type Product,
 } from "@/lib/products";
-import { submitOrder, storeOrder, orderRef } from "@/lib/order";
+import {
+  submitOrder,
+  storeOrder,
+  orderRef,
+  buildOrderMessage,
+  whatsappUrl,
+} from "@/lib/order";
 import BankDetails from "./BankDetails";
 
 /**
@@ -37,6 +44,7 @@ export default function PreorderForm({
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  const [done, setDone] = useState<{ reference: string; type: string; waUrl: string } | null>(null);
 
   const chosen = product ?? list.find((p) => p.id === selectedId) ?? list[0];
   const unit = LAUNCH_OFFER ? chosen.launchPrice : chosen.price;
@@ -64,11 +72,63 @@ export default function PreorderForm({
     };
     storeOrder(order, receiptFile).catch(() => {});
     submitOrder(order);
+    setDone({ reference, type, waUrl: whatsappUrl(buildOrderMessage(order)) });
+  };
+
+  const reset = () => {
+    setDone(null);
+    setQty(1);
+    setReceiptFile(null);
+    setReceipt(null);
+    setNote("");
+    setTouched(false);
   };
 
   const field =
     "w-full rounded-2xl border border-[var(--color-forest)]/15 bg-white/70 px-4 py-3 text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-ink)]/35 focus:border-[var(--color-leaf)] focus:ring-2 focus:ring-[var(--color-leaf)]/30";
-  const err = touched ? "border-[var(--color-strawberry)]/60" : "";
+  const err = "border-[var(--color-strawberry)]/60";
+
+  if (done) {
+    return (
+      <div className="rounded-[28px] glass p-8 text-center md:p-10">
+        <motion.div
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 16 }}
+          className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-[var(--color-leaf)]/25 text-[var(--color-forest)]"
+        >
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+        </motion.div>
+        <p className="mt-5 font-display text-3xl font-semibold text-[var(--color-forest)]">
+          Order received!
+        </p>
+        <p className="mt-1 text-sm text-[var(--color-forest)]/70">
+          Reference <span className="font-semibold text-[var(--color-rose)]">{done.reference}</span>
+        </p>
+        <p className="mx-auto mt-4 max-w-sm text-[var(--color-ink)]/70">
+          We&apos;ve opened WhatsApp to Ruaby Fresh. Tap <b>send</b> to confirm your order and
+          attach your payment receipt in the chat.
+        </p>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <a
+            href={done.waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-[var(--color-forest)] px-8 py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)]"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
+            Open WhatsApp to send
+          </a>
+          <button
+            onClick={reset}
+            className="cursor-pointer text-sm font-medium text-[var(--color-forest)]/70 transition hover:text-[var(--color-forest)]"
+          >
+            Place another order
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`rounded-[28px] glass p-6 md:p-8 ${compact ? "" : ""}`}>
