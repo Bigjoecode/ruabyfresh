@@ -25,7 +25,7 @@ export default async function OrderDetail({
     `Hi ${order.customer_name || "there"}, thank you for your Ruaby Fresh order ${order.reference}! ` +
       `We've received your payment and your order is confirmed. ` +
       `${order.fulfilment === "delivery" ? "We'll be in touch about delivery" : "It'll be ready for pickup"} shortly. ` +
-      `Fresh Vibes Only 💚`
+      `Fresh Vibes Only!`
   );
 
   const rows: { k: string; v: string }[] = [

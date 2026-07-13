@@ -158,7 +158,7 @@ export const getProduct = (id: string) =>
 
 /** Product name for order lines — avoids duplicating the size (e.g. "500ml Parfait"). */
 export const displayName = (p: Product) =>
-  p.name.includes(p.size) ? p.name : `${p.name} · ${p.size}`;
+  p.name.includes(p.size) ? p.name : `${p.name} (${p.size})`;
 
 /** True when 12+ orders actually cost less than the current single price. */
 export const hasBulkDiscount = (p: Product) =>
