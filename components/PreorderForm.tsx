@@ -34,8 +34,12 @@ export default function PreorderForm({
   compact?: boolean;
 }) {
   const list = products ?? seedProducts;
-  const [selectedId, setSelectedId] = useState(product?.id ?? list[0]?.id ?? "");
-  const [qty, setQty] = useState(1);
+  const priceOf = (p?: Product) => (p ? (LAUNCH_OFFER ? p.launchPrice : p.price) : 0);
+
+  // One or more line items (customers can order several flavours at once).
+  const [items, setItems] = useState<{ id: string; qty: number }[]>([
+    { id: product?.id ?? list[0]?.id ?? "", qty: 1 },
+  ]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [type, setType] = useState<"delivery" | "pickup">("delivery");
@@ -46,9 +50,15 @@ export default function PreorderForm({
   const [touched, setTouched] = useState(false);
   const [done, setDone] = useState<{ reference: string; type: string; waUrl: string } | null>(null);
 
-  const chosen = product ?? list.find((p) => p.id === selectedId) ?? list[0];
-  const unit = LAUNCH_OFFER ? chosen.launchPrice : chosen.price;
-  const total = unit * qty;
+  const productOf = (id: string) => list.find((p) => p.id === id);
+  const setItem = (i: number, patch: Partial<{ id: string; qty: number }>) =>
+    setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
+  const addItem = () =>
+    setItems((prev) => [...prev, { id: list[0]?.id ?? "", qty: 1 }]);
+  const removeItem = (i: number) =>
+    setItems((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
+
+  const total = items.reduce((s, it) => s + priceOf(productOf(it.id)) * it.qty, 0);
   const valid =
     name.trim() && phone.trim() && (type === "pickup" || address.trim()) && receiptFile;
 
@@ -64,10 +74,16 @@ export default function PreorderForm({
     setTouched(true);
     if (!valid || !receiptFile) return;
     const reference = orderRef();
+    const lines = items
+      .map((it) => {
+        const p = productOf(it.id);
+        return p ? { name: displayName(p), qty: it.qty, price: priceOf(p) } : null;
+      })
+      .filter((l): l is { name: string; qty: number; price: number } => l !== null);
     const order = {
       reference,
       total,
-      lines: [{ name: displayName(chosen), qty, price: unit }],
+      lines,
       customer: { name, phone, type, address, note },
     };
     storeOrder(order, receiptFile).catch(() => {});
@@ -77,7 +93,7 @@ export default function PreorderForm({
 
   const reset = () => {
     setDone(null);
-    setQty(1);
+    setItems([{ id: product?.id ?? list[0]?.id ?? "", qty: 1 }]);
     setReceiptFile(null);
     setReceipt(null);
     setNote("");
@@ -87,6 +103,21 @@ export default function PreorderForm({
   const field =
     "w-full rounded-2xl border border-[var(--color-forest)]/15 bg-white/70 px-4 py-3 text-[var(--color-ink)] outline-none transition placeholder:text-[var(--color-ink)]/35 focus:border-[var(--color-leaf)] focus:ring-2 focus:ring-[var(--color-leaf)]/30";
   const err = "border-[var(--color-strawberry)]/60";
+
+  const productOptions = (
+    <>
+      <optgroup label="Parfaits">
+        {list.filter((p) => p.category === "Parfait").map((p) => (
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </optgroup>
+      <optgroup label="Yoghurt Drinks (500ml)">
+        {list.filter((p) => p.category === "Yoghurt").map((p) => (
+          <option key={p.id} value={p.id}>{p.name}</option>
+        ))}
+      </optgroup>
+    </>
+  );
 
   if (done) {
     return (
@@ -133,67 +164,61 @@ export default function PreorderForm({
   return (
     <div className={`rounded-[28px] glass p-6 md:p-8 ${compact ? "" : ""}`}>
       <div className="grid gap-4 sm:grid-cols-2">
-        {!product && (
-          <label className="sm:col-span-2">
-            <span className="mb-1.5 block text-sm font-semibold text-[var(--color-forest)]">
-              Flavour
-            </span>
-            <select
-              value={selectedId}
-              onChange={(e) => setSelectedId(e.target.value)}
-              className={field}
-            >
-              <optgroup label="Parfaits">
-                {list
-                  .filter((p) => p.category === "Parfait")
-                  .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-              </optgroup>
-              <optgroup label="Yoghurt Drinks (500ml)">
-                {list
-                  .filter((p) => p.category === "Yoghurt")
-                  .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-              </optgroup>
-            </select>
-          </label>
-        )}
-
-        <label>
+        <div className="sm:col-span-2">
           <span className="mb-1.5 block text-sm font-semibold text-[var(--color-forest)]">
-            Quantity
+            Your order
           </span>
-          <div className="flex items-center gap-2 rounded-2xl border border-[var(--color-forest)]/15 bg-white/70 px-2 py-1.5">
-            <button
-              type="button"
-              aria-label="Decrease"
-              onClick={() => setQty((q) => Math.max(1, q - 1))}
-              className="grid h-9 w-9 cursor-pointer place-items-center rounded-full bg-[var(--color-cream)] text-[var(--color-forest)] transition hover:bg-[var(--color-leaf)] hover:text-white"
-            >
-              −
-            </button>
-            <span className="w-8 text-center font-semibold tabular-nums">{qty}</span>
-            <button
-              type="button"
-              aria-label="Increase"
-              onClick={() => setQty((q) => q + 1)}
-              className="grid h-9 w-9 cursor-pointer place-items-center rounded-full bg-[var(--color-cream)] text-[var(--color-forest)] transition hover:bg-[var(--color-leaf)] hover:text-white"
-            >
-              +
-            </button>
-            {qty >= 12 && (
-              <span className="ml-1 rounded-full bg-[var(--color-leaf-soft)]/60 px-2 py-1 text-xs font-semibold text-[var(--color-forest)]">
-                bulk
-              </span>
-            )}
+          <div className="space-y-2">
+            {items.map((it, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select
+                  value={it.id}
+                  onChange={(e) => setItem(i, { id: e.target.value })}
+                  className={`${field} min-w-0 flex-1`}
+                >
+                  {productOptions}
+                </select>
+                <div className="flex shrink-0 items-center gap-1 rounded-2xl border border-[var(--color-forest)]/15 bg-white/70 px-1.5 py-1">
+                  <button
+                    type="button"
+                    aria-label="Decrease"
+                    onClick={() => setItem(i, { qty: Math.max(1, it.qty - 1) })}
+                    className="grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-[var(--color-cream)] text-[var(--color-forest)] transition hover:bg-[var(--color-leaf)] hover:text-white"
+                  >
+                    −
+                  </button>
+                  <span className="w-6 text-center font-semibold tabular-nums">{it.qty}</span>
+                  <button
+                    type="button"
+                    aria-label="Increase"
+                    onClick={() => setItem(i, { qty: it.qty + 1 })}
+                    className="grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-[var(--color-cream)] text-[var(--color-forest)] transition hover:bg-[var(--color-leaf)] hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
+                {items.length > 1 && (
+                  <button
+                    type="button"
+                    aria-label="Remove item"
+                    onClick={() => removeItem(i)}
+                    className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-[var(--color-cream)] text-[var(--color-strawberry)] transition hover:bg-[var(--color-strawberry)]/15"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
-        </label>
+          <button
+            type="button"
+            onClick={addItem}
+            className="mt-2.5 inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[var(--color-leaf-soft)]/50 px-4 py-2 text-sm font-semibold text-[var(--color-forest)] transition hover:bg-[var(--color-leaf-soft)]"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            Add another flavour
+          </button>
+        </div>
 
         <label>
           <span className="mb-1.5 block text-sm font-semibold text-[var(--color-forest)]">

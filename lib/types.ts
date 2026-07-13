@@ -21,7 +21,9 @@ export type Settings = {
     yoghurtNow: string;
     yoghurtWas: string;
     yoghurtSub: string;
+    bannerImage: string; // full-width promo banner under the offer cards
   };
+  gallery: string[]; // gallery images shown on the storefront ("The Feed")
 };
 
 export const defaultSettings: Settings = {
@@ -47,7 +49,9 @@ export const defaultSettings: Settings = {
     yoghurtWas: "₦3,000",
     yoghurtSub:
       "Strawberry, Banana & Vanilla — rich, creamy & made fresh daily.",
+    bannerImage: "",
   },
+  gallery: [],
 };
 
 /** An order/booking row as stored in the `orders` table. */

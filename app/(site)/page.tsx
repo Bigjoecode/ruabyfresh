@@ -25,7 +25,7 @@ export default async function Home() {
       <Menu products={products} />
       <LaunchOffer offer={settings.offer} launchOffer={settings.launchOffer} />
       <WhyChoose />
-      <Gallery products={products} />
+      <Gallery products={products} images={settings.gallery} />
       <Reviews />
 
       <section id="preorder" className="relative mx-auto max-w-3xl px-4 py-24 md:py-28">

@@ -78,12 +78,22 @@ export function WhyChoose() {
 }
 
 /* ============ GALLERY ============ */
-export function Gallery({ products }: { products: Product[] }) {
-  // Fill ~6 tiles by cycling through whatever products exist.
-  const tiles = products.length
-    ? Array.from({ length: Math.min(8, Math.max(4, products.length)) }, (_, i) => products[i % products.length])
-    : [];
+export function Gallery({
+  products,
+  images = [],
+}: {
+  products: Product[];
+  images?: string[];
+}) {
+  const useImages = images.length > 0;
+  // Prefer admin-managed gallery images; otherwise cycle product photos.
+  const tiles = useImages
+    ? images
+    : products.length
+      ? Array.from({ length: Math.min(8, Math.max(4, products.length)) }, (_, i) => products[i % products.length])
+      : [];
   if (tiles.length === 0) return null;
+
   return (
     <section id="gallery" className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
       <Reveal className="mb-12 text-center">
@@ -98,7 +108,7 @@ export function Gallery({ products }: { products: Product[] }) {
       </Reveal>
 
       <Stagger className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {tiles.map((p, i) => (
+        {tiles.map((t, i) => (
           <motion.div
             key={i}
             variants={stagChild}
@@ -106,16 +116,28 @@ export function Gallery({ products }: { products: Product[] }) {
             className={`group relative overflow-hidden rounded-3xl glass ${
               i % 5 === 0 ? "md:col-span-2 md:row-span-2" : ""
             }`}
-            style={{ aspectRatio: i % 5 === 0 ? "1" : "1", minHeight: 160 }}
+            style={{ aspectRatio: "1", minHeight: 160 }}
           >
-            <div
-              className="absolute inset-0 opacity-60 blur-2xl"
-              style={{ background: p.colors[1] }}
-            />
-            <ProductImage product={p} className="relative h-full w-full p-4 transition-transform duration-500 group-hover:scale-110" />
-            <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-[var(--color-forest)]/80 to-transparent p-4 text-sm font-medium text-white transition group-hover:translate-y-0">
-              {p.name}
-            </div>
+            {useImages ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={t as string}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            ) : (
+              <>
+                <div
+                  className="absolute inset-0 opacity-60 blur-2xl"
+                  style={{ background: (t as Product).colors[1] }}
+                />
+                <ProductImage product={t as Product} className="relative h-full w-full p-4 transition-transform duration-500 group-hover:scale-110" />
+                <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-[var(--color-forest)]/80 to-transparent p-4 text-sm font-medium text-white transition group-hover:translate-y-0">
+                  {(t as Product).name}
+                </div>
+              </>
+            )}
           </motion.div>
         ))}
       </Stagger>
@@ -240,6 +262,17 @@ export function LaunchOffer({
             </a>
           </div>
         </div>
+
+        {offer.bannerImage && (
+          <div className="mt-4 overflow-hidden rounded-[32px] glass p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={offer.bannerImage}
+              alt="Ruaby Fresh offer"
+              className="w-full rounded-[26px] object-contain"
+            />
+          </div>
+        )}
       </Reveal>
     </section>
   );

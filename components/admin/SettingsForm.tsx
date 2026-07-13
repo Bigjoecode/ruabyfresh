@@ -33,6 +33,14 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
     setHero("floatingImages", arr.filter(Boolean));
   };
 
+  const gallery = s.gallery ?? [];
+  const setGallery = (i: number, url: string) => {
+    const arr = [...gallery];
+    if (url) arr[i] = url;
+    else arr.splice(i, 1);
+    setS((p) => ({ ...p, gallery: arr.filter(Boolean) }));
+  };
+
   const save = () => {
     setError("");
     setSaved(false);
@@ -160,6 +168,36 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
             <span className={label}>Yoghurt — subtext</span>
             <input className={input} value={s.offer.yoghurtSub} onChange={(e) => setOffer("yoghurtSub", e.target.value)} />
           </label>
+        </div>
+
+        <div className="border-t border-[var(--color-forest)]/10 pt-5">
+          <ImageUpload
+            value={s.offer.bannerImage}
+            onChange={(url) => setOffer("bannerImage", url)}
+            bucket="hero-images"
+            label="Promo banner (shown full-width under the two cards)"
+            hint="Upload your offer flyer/design. Leave empty to hide the banner."
+          />
+        </div>
+      </section>
+
+      {/* GALLERY */}
+      <section className={card}>
+        <h2 className="font-display text-xl font-semibold text-[var(--color-forest)]">Gallery</h2>
+        <p className="text-sm text-[var(--color-ink)]/55">
+          The images in the &ldquo;Too pretty to not share&rdquo; grid. Upload up to 8; leave
+          all empty to fall back to product photos.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <ImageUpload
+              key={i}
+              value={gallery[i] ?? ""}
+              onChange={(url) => setGallery(i, url)}
+              bucket="hero-images"
+              label={`Image ${i + 1}`}
+            />
+          ))}
         </div>
       </section>
 
