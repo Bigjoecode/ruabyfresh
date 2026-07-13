@@ -63,7 +63,7 @@ export default function PreorderForm({
       customer: { name, phone, type, address, note },
     };
     storeOrder(order, receiptFile).catch(() => {});
-    submitOrder(order, receiptFile);
+    submitOrder(order);
   };
 
   const field =
@@ -257,7 +257,7 @@ export default function PreorderForm({
         </p>
       )}
       <p className="mt-3 text-center text-xs text-[var(--color-forest)]/50">
-        On your phone, WhatsApp opens to {BRAND.whatsappDisplay} with your receipt and order attached.
+        WhatsApp opens a chat to {BRAND.whatsappDisplay} with your order — attach your receipt there too.
       </p>
     </div>
   );

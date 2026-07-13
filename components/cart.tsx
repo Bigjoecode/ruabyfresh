@@ -165,9 +165,10 @@ function CartDrawer() {
         price: unitPrice(l.product, bulk),
       })),
     };
-    // Save to the admin dashboard (with receipt), then hand off to WhatsApp.
+    // Save to the admin dashboard (with receipt), then hand off to WhatsApp
+    // addressed to the official Ruaby line.
     storeOrder(order, receiptFile).catch(() => {});
-    submitOrder(order, receiptFile);
+    submitOrder(order);
     setOpen(false);
   };
 
@@ -354,8 +355,9 @@ function CartDrawer() {
                   </div>
 
                   <p className="rounded-xl bg-[var(--color-leaf-soft)]/40 px-4 py-3 text-xs leading-relaxed text-[var(--color-forest)]">
-                    After transferring, upload your receipt and tap below. On your phone,
-                    WhatsApp opens with the receipt <b>and</b> order attached — just hit send.
+                    After transferring, upload your receipt and tap below — WhatsApp opens
+                    a chat to Ruaby Fresh with your order ready to send. Please attach your
+                    receipt screenshot in that chat too.
                   </p>
                 </div>
               )}

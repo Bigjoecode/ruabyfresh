@@ -27,10 +27,13 @@ export function orderRef() {
  * Builds the plain-text order message. No emojis (keeps it clean across all
  * devices) and no bank details (the customer has already paid).
  */
-export function buildOrderMessage(
-  { lines, total, customer, reference, bulk }: OrderInput,
-  receiptAttached: boolean
-) {
+export function buildOrderMessage({
+  lines,
+  total,
+  customer,
+  reference,
+  bulk,
+}: OrderInput) {
   const items = lines
     .map((l) => `• ${l.qty} × ${l.name} — ${formatNaira(l.price * l.qty)}`)
     .join("\n");
@@ -49,9 +52,7 @@ export function buildOrderMessage(
     `${fulfilment}\n` +
     (customer.note ? `Note: ${customer.note}\n` : "") +
     `\n` +
-    (receiptAttached
-      ? `I've made the transfer — my payment receipt is attached.`
-      : `I've made the transfer. Attaching my payment receipt now.`)
+    `I've made the transfer. I'll attach my payment receipt in this chat.`
   );
 }
 
@@ -73,37 +74,12 @@ export function storeOrder(order: OrderInput, receipt: File) {
 }
 
 /**
- * Sends the order. On devices that support sharing files (most phones), this
- * opens the native share sheet with the receipt image AND the order text so
- * the customer can send both to Ruaby Fresh on WhatsApp in one tap. On
- * desktop / unsupported browsers it falls back to a WhatsApp link (text only)
- * and the customer attaches the receipt manually.
- *
- * Returns how it was sent, or "cancelled" if the user dismissed the share sheet.
+ * Opens WhatsApp addressed to the OFFICIAL Ruaby line with the order details
+ * pre-filled, so every order reliably reaches the same number (a share sheet
+ * would let the customer pick the wrong chat). The receipt is already saved to
+ * the admin + emailed by storeOrder(); the customer is prompted to also attach
+ * it in the chat.
  */
-export async function submitOrder(
-  order: OrderInput,
-  receipt: File
-): Promise<"shared" | "whatsapp" | "cancelled"> {
-  const canShareFile =
-    typeof navigator !== "undefined" &&
-    typeof navigator.canShare === "function" &&
-    navigator.canShare({ files: [receipt] });
-
-  if (canShareFile) {
-    try {
-      await navigator.share({
-        title: "Ruaby Fresh Pre-order",
-        text: buildOrderMessage(order, true),
-        files: [receipt],
-      });
-      return "shared";
-    } catch (e) {
-      if ((e as DOMException)?.name === "AbortError") return "cancelled";
-      // otherwise fall through to the WhatsApp link
-    }
-  }
-
-  window.open(whatsappUrl(buildOrderMessage(order, false)), "_blank", "noopener");
-  return "whatsapp";
+export function submitOrder(order: OrderInput) {
+  window.open(whatsappUrl(buildOrderMessage(order)), "_blank", "noopener");
 }
