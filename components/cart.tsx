@@ -187,7 +187,10 @@ function CartDrawer() {
     // Save to the admin (uploads the receipt) and get a link back to include in
     // the WhatsApp message, then hand off to the official Ruaby line.
     const res = await storeOrder(order, receiptFile);
-    const receiptUrl = res?.receiptUrl ?? null;
+    // Use a tidy short link (/r/<ref>) that resolves to the receipt on demand.
+    const receiptUrl = res?.receiptUrl
+      ? `${window.location.origin}/r/${reference}`
+      : null;
     submitOrder(order, receiptUrl);
     // Show the on-screen confirmation and empty the basket.
     setConfirmed({ reference, phone, type, waUrl: whatsappUrl(buildOrderMessage(order, receiptUrl)) });

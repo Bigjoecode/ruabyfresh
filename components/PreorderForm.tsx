@@ -89,7 +89,9 @@ export default function PreorderForm({
       customer: { name, phone, type, address, note },
     };
     const res = await storeOrder(order, receiptFile);
-    const receiptUrl = res?.receiptUrl ?? null;
+    const receiptUrl = res?.receiptUrl
+      ? `${window.location.origin}/r/${reference}`
+      : null;
     submitOrder(order, receiptUrl);
     setDone({ reference, type, waUrl: whatsappUrl(buildOrderMessage(order, receiptUrl)) });
     setSending(false);
