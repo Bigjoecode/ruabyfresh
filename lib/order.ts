@@ -27,13 +27,10 @@ export function orderRef() {
  * Builds the plain-text order message. No emojis (keeps it clean across all
  * devices) and no bank details (the customer has already paid).
  */
-export function buildOrderMessage({
-  lines,
-  total,
-  customer,
-  reference,
-  bulk,
-}: OrderInput) {
+export function buildOrderMessage(
+  { lines, total, customer, reference, bulk }: OrderInput,
+  receiptUrl?: string | null
+) {
   const items = lines
     .map((l) => `• ${l.qty} × ${l.name} — ${formatNaira(l.price * l.qty)}`)
     .join("\n");
@@ -52,7 +49,9 @@ export function buildOrderMessage({
     `${fulfilment}\n` +
     (customer.note ? `Note: ${customer.note}\n` : "") +
     `\n` +
-    `I've made the transfer. I'll attach my payment receipt in this chat.`
+    (receiptUrl
+      ? `I've made the transfer.\nPayment receipt: ${receiptUrl}`
+      : `I've made the transfer. I'll attach my payment receipt in this chat.`)
   );
 }
 
@@ -62,15 +61,23 @@ export function whatsappUrl(message: string) {
 }
 
 /**
- * Saves the order + receipt to the admin (via /api/order). Fire-and-forget:
- * returns the fetch promise so callers can .catch() but need not await
- * (so the WhatsApp share stays within the click's user-gesture window).
+ * Saves the order + receipt to the admin (via /api/order) and returns the
+ * parsed response, including `receiptUrl` — a 7-day signed link to the uploaded
+ * receipt that we drop into the WhatsApp message so it "comes with" the order.
  */
-export function storeOrder(order: OrderInput, receipt: File) {
+export async function storeOrder(
+  order: OrderInput,
+  receipt: File
+): Promise<{ ok: boolean; reference?: string; receiptUrl?: string | null }> {
   const fd = new FormData();
   fd.append("payload", JSON.stringify(order));
   fd.append("receipt", receipt);
-  return fetch("/api/order", { method: "POST", body: fd });
+  try {
+    const res = await fetch("/api/order", { method: "POST", body: fd });
+    return await res.json();
+  } catch {
+    return { ok: false };
+  }
 }
 
 /**
@@ -80,6 +87,6 @@ export function storeOrder(order: OrderInput, receipt: File) {
  * the admin + emailed by storeOrder(); the customer is prompted to also attach
  * it in the chat.
  */
-export function submitOrder(order: OrderInput) {
-  window.open(whatsappUrl(buildOrderMessage(order)), "_blank", "noopener");
+export function submitOrder(order: OrderInput, receiptUrl?: string | null) {
+  window.open(whatsappUrl(buildOrderMessage(order, receiptUrl)), "_blank", "noopener");
 }

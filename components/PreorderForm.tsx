@@ -48,6 +48,7 @@ export default function PreorderForm({
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
+  const [sending, setSending] = useState(false);
   const [done, setDone] = useState<{ reference: string; type: string; waUrl: string } | null>(null);
 
   const productOf = (id: string) => list.find((p) => p.id === id);
@@ -70,9 +71,10 @@ export default function PreorderForm({
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     setTouched(true);
-    if (!valid || !receiptFile) return;
+    if (!valid || !receiptFile || sending) return;
+    setSending(true);
     const reference = orderRef();
     const lines = items
       .map((it) => {
@@ -86,9 +88,11 @@ export default function PreorderForm({
       lines,
       customer: { name, phone, type, address, note },
     };
-    storeOrder(order, receiptFile).catch(() => {});
-    submitOrder(order);
-    setDone({ reference, type, waUrl: whatsappUrl(buildOrderMessage(order)) });
+    const res = await storeOrder(order, receiptFile);
+    const receiptUrl = res?.receiptUrl ?? null;
+    submitOrder(order, receiptUrl);
+    setDone({ reference, type, waUrl: whatsappUrl(buildOrderMessage(order, receiptUrl)) });
+    setSending(false);
   };
 
   const reset = () => {
@@ -137,8 +141,8 @@ export default function PreorderForm({
           Reference <span className="font-semibold text-[var(--color-rose)]">{done.reference}</span>
         </p>
         <p className="mx-auto mt-4 max-w-sm text-[var(--color-ink)]/70">
-          We&apos;ve opened WhatsApp to Ruaby Fresh. Tap <b>send</b> to confirm your order and
-          attach your payment receipt in the chat.
+          We&apos;ve opened WhatsApp to Ruaby Fresh with your order and receipt link included.
+          Just tap <b>send</b> to confirm.
         </p>
         <div className="mt-6 flex flex-col items-center gap-3">
           <a
@@ -328,10 +332,17 @@ export default function PreorderForm({
         </div>
         <button
           onClick={submit}
-          className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[var(--color-forest)] px-8 py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)] sm:w-auto"
+          disabled={sending}
+          className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[var(--color-forest)] px-8 py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)] disabled:opacity-60 sm:w-auto"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
-          <span className="relative z-10">Send pre-order on WhatsApp</span>
+          {sending ? (
+            <span className="relative z-10">Preparing your order…</span>
+          ) : (
+            <>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
+              <span className="relative z-10">Send pre-order on WhatsApp</span>
+            </>
+          )}
         </button>
       </div>
       {touched && !valid && (
@@ -342,7 +353,7 @@ export default function PreorderForm({
         </p>
       )}
       <p className="mt-3 text-center text-xs text-[var(--color-forest)]/50">
-        WhatsApp opens a chat to {BRAND.whatsappDisplay} with your order — attach your receipt there too.
+        WhatsApp opens a chat to {BRAND.whatsappDisplay} with your order and receipt link included.
       </p>
     </div>
   );

@@ -51,7 +51,9 @@ export async function POST(req: Request) {
 
     // Upload receipt screenshot to the private bucket; store the PATH (a signed
     // URL is generated on demand in the admin, so receipts stay private).
+    // Also mint a longer-lived signed URL to include in the WhatsApp message.
     let receiptPath: string | null = null;
+    let receiptUrl: string | null = null;
     if (receipt && typeof receipt !== "string" && receipt.size > 0) {
       const ext = (receipt.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
       const path = `${reference}-${Date.now()}.${ext || "png"}`;
@@ -59,7 +61,13 @@ export async function POST(req: Request) {
       const { error: upErr } = await sb.storage
         .from("receipts")
         .upload(path, bytes, { contentType: receipt.type || "image/png", upsert: true });
-      if (!upErr) receiptPath = path;
+      if (!upErr) {
+        receiptPath = path;
+        const { data: signed } = await sb.storage
+          .from("receipts")
+          .createSignedUrl(path, 60 * 60 * 24 * 7); // 7 days
+        receiptUrl = signed?.signedUrl ?? null;
+      }
     }
 
     const { data: inserted, error } = await sb
@@ -97,6 +105,7 @@ export async function POST(req: Request) {
       reference,
       stored: true,
       emailed: emailed.status,
+      receiptUrl,
     });
   } catch (e) {
     return NextResponse.json(

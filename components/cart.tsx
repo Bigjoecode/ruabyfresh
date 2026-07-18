@@ -132,6 +132,7 @@ function CartDrawer() {
   const [receipt, setReceipt] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
   const [payTouched, setPayTouched] = useState(false);
+  const [sending, setSending] = useState(false);
   const [confirmed, setConfirmed] = useState<{
     reference: string;
     phone: string;
@@ -166,9 +167,10 @@ function CartDrawer() {
     }
   };
 
-  const sendOrder = () => {
+  const sendOrder = async () => {
     setPayTouched(true);
-    if (!receiptFile) return; // receipt is required
+    if (!receiptFile || sending) return; // receipt is required
+    setSending(true);
     const reference = orderRef();
     const customer: Customer = { name, phone, type, address, note };
     const order = {
@@ -182,16 +184,18 @@ function CartDrawer() {
         price: unitPrice(l.product, bulk),
       })),
     };
-    // Save to the admin dashboard (with receipt), then hand off to WhatsApp
-    // addressed to the official Ruaby line.
-    storeOrder(order, receiptFile).catch(() => {});
-    submitOrder(order);
+    // Save to the admin (uploads the receipt) and get a link back to include in
+    // the WhatsApp message, then hand off to the official Ruaby line.
+    const res = await storeOrder(order, receiptFile);
+    const receiptUrl = res?.receiptUrl ?? null;
+    submitOrder(order, receiptUrl);
     // Show the on-screen confirmation and empty the basket.
-    setConfirmed({ reference, phone, type, waUrl: whatsappUrl(buildOrderMessage(order)) });
+    setConfirmed({ reference, phone, type, waUrl: whatsappUrl(buildOrderMessage(order, receiptUrl)) });
     setStep("done");
     clear();
     setReceiptFile(null);
     setReceipt(null);
+    setSending(false);
   };
 
   const field =
@@ -381,8 +385,8 @@ function CartDrawer() {
 
                   <p className="rounded-xl bg-[var(--color-leaf-soft)]/40 px-4 py-3 text-xs leading-relaxed text-[var(--color-forest)]">
                     After transferring, upload your receipt and tap below — WhatsApp opens
-                    a chat to Ruaby Fresh with your order ready to send. Please attach your
-                    receipt screenshot in that chat too.
+                    a chat to Ruaby Fresh with your order <b>and a link to your receipt</b>
+                    {" "}already included. Just hit send.
                   </p>
                 </div>
               )}
@@ -410,8 +414,8 @@ function CartDrawer() {
                   <div className="mt-6 w-full rounded-2xl bg-[var(--color-leaf-soft)]/40 p-4 text-left">
                     <p className="font-semibold text-[var(--color-forest)]">One last step</p>
                     <p className="mt-1 text-sm leading-relaxed text-[var(--color-forest)]/85">
-                      We&apos;ve opened WhatsApp to Ruaby Fresh. Tap <b>send</b> to confirm your
-                      order, and attach your payment receipt in the chat.
+                      We&apos;ve opened WhatsApp to Ruaby Fresh with your order and receipt link
+                      included. Just tap <b>send</b> to confirm.
                     </p>
                   </div>
 
@@ -472,9 +476,15 @@ function CartDrawer() {
                 </button>
               )}
               {step === "pay" && (
-                <button onClick={sendOrder} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--color-forest)] py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)]">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
-                  I&apos;ve paid — send on WhatsApp
+                <button onClick={sendOrder} disabled={sending} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[var(--color-forest)] py-4 font-semibold text-white transition hover:bg-[var(--color-forest-deep)] disabled:opacity-60">
+                  {sending ? (
+                    "Preparing your order…"
+                  ) : (
+                    <>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.5-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.5.3.1.2.1.6-.1 1Z" /></svg>
+                      I&apos;ve paid — send on WhatsApp
+                    </>
+                  )}
                 </button>
               )}
               <p className="text-center text-xs text-[var(--color-forest)]/50">
